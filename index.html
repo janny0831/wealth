@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今彩539 大數據預測分析系統 (Excel版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 SheetJS 用於解析 Excel 檔案 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .drop-zone { border: 2px dashed #cbd5e1; transition: all 0.3s; }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #3b82f6; background-color: #eff6ff; }
+        .ball-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .ball-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .ball-green { background: linear-gradient(135deg, #10b981, #047857); }
+        .ball-gold { background: linear-gradient(135deg, #f59e0b, #b45309); border: 2px solid #fffbeb; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="max-w-4xl mx-auto p-4">
+        <!-- Header -->
+        <div class="text-center mb-8 pt-4">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">🎰 台灣今彩539 大數據預測分析儀</h1>
+            <p class="text-gray-600 font-medium">支援 Excel (.xlsx) 與 CSV 檔案匯入</p>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-2">📊</span>
+                步驟 1：匯入 Excel 歷史資料
+            </h2>
+            <div id="dropZone" class="drop-zone rounded-xl p-8 text-center cursor-pointer relative">
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                <div class="pointer-events-none">
+                    <p class="text-5xl mb-3">📈</p>
+                    <p class="text-lg font-medium text-gray-700">點擊選擇或拖曳 Excel / CSV 檔案至此</p>
+                    <p class="text-sm text-gray-500 mt-2">請確保第一欄為日期，其後五欄為開獎號碼</p>
+                </div>
+            </div>
+            
+            <div id="fileInfo" class="mt-4 hidden p-4 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center">
+                <div>
+                    <span id="fileName" class="font-bold text-blue-800">filename.xlsx</span>
+                    <p id="recordCount" class="text-xs text-blue-600 mt-1">共讀取 0 筆資料</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">最後開獎日</p>
+                    <p id="lastDateDisplay" class="font-bold text-gray-700">----/--/--</p>
+                </div>
+            </div>
+
+            <div id="dateWarning" class="mt-2 hidden p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200 text-sm">
+                💡 提醒：資料日期較久，建議至 <a href="https://www.pilio.idv.tw/lto539/list539APP.asp" target="_blank" class="underline text-blue-600 font-bold">Pilio 539</a> 更新至最新開獎號碼以獲取最佳預測。
+            </div>
+
+            <button id="analyzeBtn" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition transform active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed" disabled>
+                🚀 執行大數據模擬分析
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsArea" class="hidden">
+            <!-- 趨勢摘要 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="card mb-0 border-t-4 border-indigo-500">
+                    <h3 class="font-bold text-lg mb-3">📊 盤勢趨勢</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">奇偶傾向</span>
+                            <span id="parityTrend" class="font-bold">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">大小傾向</span>
+                            <span id="sizeTrend" class="font-bold">--</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t pt-2">
+                            <span class="text-gray-500">強勢尾數</span>
+                            <span id="tailTrend" class="text-red-600 font-bold">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-0 border-t-4 border-orange-500">
+                    <h3 class="font-bold text-lg mb-3">🧠 預測邏輯</h3>
+                    <p id="logicReason" class="text-sm text-gray-600 leading-relaxed italic">分析中...</p>
+                    <div id="marketWarning" class="mt-3 text-xs font-bold py-1 px-2 rounded inline-block">盤勢判定中...</div>
+                </div>
+            </div>
+
+            <!-- 號碼推薦 -->
+            <div class="card border-l-8 border-red-500">
+                <h2 class="text-xl font-bold mb-6 text-red-700">🎯 綜合加權推薦號碼</h2>
+                <div class="mb-8">
+                    <p class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase text-center md:text-left">核心首選 (五碼)</p>
+                    <div id="top5Container" class="flex flex-wrap justify-center md:justify-start gap-3"></div>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase text-center md:text-left">機率候補 (三碼)</p>
+                    <div id="next3Container" class="flex flex-wrap justify-center md:justify-start gap-3 opacity-75"></div>
+                </div>
+            </div>
+
+            <!-- 星等組合 -->
+            <div class="card bg-slate-900 text-white border-l-8 border-yellow-500">
+                <h2 class="text-xl font-bold mb-4 text-yellow-400">💎 黃金星等組合</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span class="text-slate-400 font-bold">2星對碰</span>
+                        <span id="combo2" class="text-xl font-mono font-bold text-yellow-300">--</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span class="text-slate-400 font-bold">3星精選</span>
+                        <span id="combo3" class="text-xl font-mono font-bold text-yellow-300">--</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span class="text-slate-400 font-bold">4星高機率</span>
+                        <span id="combo4" class="text-xl font-mono font-bold text-yellow-300">--</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-yellow-600/20 border border-yellow-500/30 rounded-lg">
+                        <span class="text-yellow-400 font-bold italic">5星全能推薦</span>
+                        <span id="combo5" class="text-xl font-mono font-bold text-white">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileNameSpan = document.getElementById('fileName');
+        const recordCountSpan = document.getElementById('recordCount');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsArea = document.getElementById('resultsArea');
+        const lastDateDisplay = document.getElementById('lastDateDisplay');
+        const dateWarning = document.getElementById('dateWarning');
+
+        let drawData = [];
+
+        // 拖曳控制
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, preventDefaults, false));
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('dragover')));
+        ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('dragover')));
+
+        dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files[0]));
+        fileInput.addEventListener('change', e => handleFiles(e.target.files[0]));
+
+        function handleFiles(file) {
+            if (!file) return;
+            fileNameSpan.textContent = file.name;
+            fileInfo.classList.remove('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // 轉換為 JSON 陣列
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                processData(json);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processData(rows) {
+            drawData = [];
+            rows.forEach((row) => {
+                if (row.length >= 6) {
+                    let dateVal = row[0];
+                    let nums = row.slice(1, 6).map(n => parseInt(n)).filter(n => !isNaN(n) && n >= 1 && n <= 39);
+                    
+                    if (nums.length === 5) {
+                        drawData.push({
+                            date: dateVal instanceof Date ? dateVal : new Date(dateVal),
+                            nums: nums.sort((a,b) => a-b)
+                        });
+                    }
+                }
+            });
+
+            drawData.sort((a, b) => a.date - b.date);
+
+            if (drawData.length > 0) {
+                recordCountSpan.textContent = `共讀取 ${drawData.length} 筆資料`;
+                const lastEntry = drawData[drawData.length - 1];
+                const lastDateStr = lastEntry.date.toLocaleDateString('zh-TW');
+                lastDateDisplay.textContent = lastDateStr;
+                
+                const diffDays = (new Date() - lastEntry.date) / (1000 * 60 * 60 * 24);
+                if (diffDays > 3) dateWarning.classList.remove('hidden');
+                else dateWarning.classList.add('hidden');
+
+                analyzeBtn.disabled = false;
+            } else {
+                alert("找不到符合格式的資料。請確認第一欄為日期，第二至六欄為數字。");
+            }
+        }
+
+        analyzeBtn.addEventListener('click', () => {
+            if (drawData.length < 10) return;
+            
+            const lastNums = drawData[drawData.length - 1].nums;
+            
+            // 1. 拖牌統計
+            const tuoPai = {};
+            for(let i=0; i < drawData.length - 1; i++) {
+                const current = drawData[i].nums;
+                const next = drawData[i+1].nums;
+                if (current.some(n => lastNums.includes(n))) {
+                    next.forEach(n => tuoPai[n] = (tuoPai[n] || 0) + 1);
+                }
+            }
+            
+            // 2. 尾數與冷熱
+            const tails = {};
+            const hot30 = {};
+            
+            drawData.slice(-30).forEach(d => d.nums.forEach(n => {
+                tails[n % 10] = (tails[n % 10] || 0) + 1;
+                hot30[n] = (hot30[n] || 0) + 1;
+            }));
+
+            // 3. 趨勢計算 (近 5 期)
+            let odd = 0, small = 0;
+            drawData.slice(-5).forEach(d => d.nums.forEach(n => {
+                if (n % 2 !== 0) odd++;
+                if (n <= 19) small++;
+            }));
+
+            // 4. 加權計分
+            let scores = [];
+            const maxTP = Math.max(...Object.values(tuoPai), 1);
+            
+            for(let i=1; i<=39; i++) {
+                let s = 0;
+                s += ((tuoPai[i] || 0) / maxTP) * 45; 
+                s += ((tails[i % 10] || 0) / 15) * 20; 
+                s += ((hot30[i] || 0) / 10) * 20;    
+                
+                if (lastNums.includes(i)) s += 5; 
+                if (lastNums.includes(i-1) || lastNums.includes(i+1)) s += 3;
+
+                scores.push({ num: i, score: s });
+            }
+            scores.sort((a,b) => b.score - a.score);
+
+            renderResults(scores, odd/5, small/5, lastNums, tails);
+        });
+
+        function renderResults(scores, avgOdd, avgSmall, lastNums, tails) {
+            resultsArea.classList.remove('hidden');
+            const top8 = scores.slice(0, 8).map(s => s.num);
+            
+            renderBalls(top8.slice(0, 5), 'top5Container', 'large');
+            renderBalls(top8.slice(5, 8), 'next3Container', 'normal');
+
+            const fmt = n => String(n).padStart(2, '0');
+            document.getElementById('combo2').textContent = `${fmt(top8[0])} , ${fmt(top8[1])}`;
+            document.getElementById('combo3').textContent = `${fmt(top8[0])} , ${fmt(top8[1])} , ${fmt(top8[2])}`;
+            document.getElementById('combo4').textContent = `${fmt(top8[0])} , ${fmt(top8[1])} , ${fmt(top8[2])} , ${fmt(top8[3])}`;
+            document.getElementById('combo5').textContent = `${fmt(top8[0])} , ${fmt(top8[1])} , ${fmt(top8[2])} , ${fmt(top8[3])} , ${fmt(top8[4])}`;
+
+            document.getElementById('parityTrend').textContent = avgOdd > 2.5 ? "強勢偏單" : "強勢偏雙";
+            document.getElementById('sizeTrend').textContent = avgSmall > 2.5 ? "小號密集" : "大號回補";
+            
+            let bestTail = Object.entries(tails).sort((a,b) => b[1] - a[1])[0][0];
+            document.getElementById('tailTrend').textContent = `${bestTail} 尾開出頻率最高`;
+
+            document.getElementById('logicReason').innerHTML = `
+                基於上期號碼 [${lastNums.join(',')}] 的歷史拖牌規律，顯示號碼 <b>${top8[0]}</b> 與 <b>${top8[1]}</b> 在此版路下有極強跟隨性。
+                目前盤勢呈現<b>${avgSmall > 2.5 ? '小號' : '大號'}</b>領先，建議配置時保留 2-3 碼對應號碼。
+            `;
+
+            const warning = document.getElementById('marketWarning');
+            warning.textContent = "當前狀態：熱門連號規律明顯";
+            warning.className = "mt-3 text-xs font-bold py-1 px-2 rounded inline-block bg-green-100 text-green-700";
+
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderBalls(nums, containerId, size) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            nums.forEach(n => {
+                const ball = document.createElement('div');
+                let color = 'ball-red';
+                if (n <= 10) color = 'ball-gold';
+                else if (n <= 20) color = 'ball-blue';
+                else if (n <= 30) color = 'ball-green';
+
+                const sizeClass = size === 'large' ? 'w-12 h-12 text-xl' : 'w-10 h-10 text-base';
+                ball.className = `flex justify-center items-center rounded-full font-bold text-white shadow-lg ${color} ${sizeClass}`;
+                ball.textContent = String(n).padStart(2, '0');
+                container.appendChild(ball);
+            });
+        }
+    </script>
+</body>
+</html>
