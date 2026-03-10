@@ -12,6 +12,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
+            font-size: 16px; /* 提升基礎字級 */
         }
 
         .category-tab.active {
@@ -44,72 +45,72 @@
         <div class="max-w-4xl mx-auto p-4 flex justify-between items-center">
             <div class="flex flex-col">
                 <h1 class="text-2xl font-black text-orange-600 tracking-tight">戀焗</h1>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Pasta & Gratin</p>
+                <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Pasta & Gratin</p>
             </div>
             
-            <button onclick="toggleSettingsModal(true)" class="bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl flex items-center space-x-2 active:bg-gray-100 transition">
+            <button onclick="toggleSettingsModal(true)" class="bg-gray-50 border border-gray-100 px-4 py-2 rounded-xl flex items-center space-x-2 active:bg-gray-100 transition">
                 <div class="flex flex-col text-right">
-                    <span id="order-type-display" class="text-xs font-black text-orange-600">內用</span>
-                    <span id="table-display" class="text-[10px] font-bold text-gray-500">未填桌號</span>
+                    <span id="order-type-display" class="text-sm font-black text-orange-600">內用</span>
+                    <span id="table-display" class="text-sm font-bold text-gray-500">未填桌號</span>
                 </div>
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </button>
         </div>
     </header>
 
     <!-- Category Tabs -->
-    <nav id="category-nav" class="bg-white/95 backdrop-blur-md sticky top-[68px] z-30 border-b overflow-x-auto whitespace-nowrap px-4 py-3 no-scrollbar shadow-sm">
-        <button onclick="scrollToCategory('cat-set', this)" class="category-tab inline-block px-5 py-2 rounded-full text-sm font-bold mr-2 bg-gray-100 text-gray-500 active transition-colors">簡餐</button>
-        <button onclick="scrollToCategory('cat-noodle', this)" class="category-tab inline-block px-5 py-2 rounded-full text-sm font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">暖心湯麵</button>
-        <button onclick="scrollToCategory('cat-pasta', this)" class="category-tab inline-block px-5 py-2 rounded-full text-sm font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">義式/焗烤</button>
-        <button onclick="scrollToCategory('cat-snack', this)" class="category-tab inline-block px-5 py-2 rounded-full text-sm font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">飲品小點</button>
+    <nav id="category-nav" class="bg-white/95 backdrop-blur-md sticky top-[72px] z-30 border-b overflow-x-auto whitespace-nowrap px-4 py-4 no-scrollbar shadow-sm">
+        <button onclick="scrollToCategory('cat-set', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 active transition-colors">簡餐</button>
+        <button onclick="scrollToCategory('cat-noodle', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">暖心湯麵</button>
+        <button onclick="scrollToCategory('cat-pasta', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">義式/焗烤</button>
+        <button onclick="scrollToCategory('cat-snack', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">飲品小點</button>
     </nav>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-8">
-        <section id="cat-set" class="scroll-mt-[130px]">
-            <h2 class="text-lg font-black text-gray-800 mb-3 flex items-center">
-                <span class="w-1.5 h-5 bg-orange-500 rounded-full mr-2"></span>簡餐系列
-                <span class="ml-2 text-[10px] text-gray-400 font-bold bg-gray-100 px-2 py-0.5 rounded-full">附湯/小菜</span>
+    <main class="max-w-4xl mx-auto p-4 space-y-10">
+        <section id="cat-set" class="scroll-mt-[150px]">
+            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
+                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>簡餐系列
+                <span class="ml-2 text-xs text-gray-400 font-bold bg-gray-100 px-2.5 py-1 rounded-full">附湯/小菜</span>
             </h2>
-            <div class="grid grid-cols-2 gap-3" id="menu-sets"></div>
+            <div class="grid grid-cols-2 gap-4" id="menu-sets"></div>
         </section>
 
-        <section id="cat-noodle" class="scroll-mt-[130px]">
-            <h2 class="text-lg font-black text-gray-800 mb-3 flex items-center">
-                <span class="w-1.5 h-5 bg-orange-500 rounded-full mr-2"></span>暖心湯麵
+        <section id="cat-noodle" class="scroll-mt-[150px]">
+            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
+                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>暖心湯麵
             </h2>
-            <div class="grid grid-cols-2 gap-3" id="menu-noodles"></div>
+            <div class="grid grid-cols-2 gap-4" id="menu-noodles"></div>
         </section>
 
-        <section id="cat-pasta" class="scroll-mt-[130px]">
-            <h2 class="text-lg font-black text-gray-800 mb-3 flex items-center">
-                <span class="w-1.5 h-5 bg-orange-500 rounded-full mr-2"></span>義式 / 焗烤
+        <section id="cat-pasta" class="scroll-mt-[150px]">
+            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
+                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>義式 / 焗烤
             </h2>
-            <div class="grid grid-cols-2 gap-3" id="menu-pasta"></div>
+            <div class="grid grid-cols-2 gap-4" id="menu-pasta"></div>
         </section>
 
-        <section id="cat-snack" class="scroll-mt-[130px]">
-            <h2 class="text-lg font-black text-gray-800 mb-3 flex items-center">
-                <span class="w-1.5 h-5 bg-orange-500 rounded-full mr-2"></span>飲料與小點
+        <section id="cat-snack" class="scroll-mt-[150px]">
+            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
+                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>飲料與小點
             </h2>
-            <div class="grid grid-cols-2 gap-3" id="menu-snacks"></div>
+            <div class="grid grid-cols-2 gap-4" id="menu-snacks"></div>
         </section>
     </main>
 
     <!-- Bottom Action Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white sticky-summary z-40 px-4 py-4 sm:pb-4 pb-8 border-t">
+    <div class="fixed bottom-0 left-0 right-0 bg-white sticky-summary z-40 px-4 py-5 sm:pb-5 pb-10 border-t">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <button onclick="toggleCartModal(true)" class="flex items-center space-x-3 group relative pl-2">
-                <div class="relative bg-orange-100 text-orange-600 p-3 rounded-2xl group-active:scale-95 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    <span id="total-qty" class="absolute -top-2 -right-2 bg-red-500 text-white text-[11px] w-6 h-6 flex items-center justify-center rounded-full border-2 border-white font-black shadow-sm transition-all scale-0 origin-center">0</span>
+            <button onclick="toggleCartModal(true)" class="flex items-center space-x-4 group relative pl-2">
+                <div class="relative bg-orange-100 text-orange-600 p-3.5 rounded-2xl group-active:scale-95 transition-transform">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span id="total-qty" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-7 h-7 flex items-center justify-center rounded-full border-2 border-white font-black shadow-sm transition-all scale-0 origin-center">0</span>
                 </div>
                 <div class="text-left">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">總金額</p>
-                    <p class="text-xl font-black text-gray-800">NT$ <span id="total-price">0</span></p>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">總金額</p>
+                    <p class="text-2xl font-black text-gray-800">NT$ <span id="total-price">0</span></p>
                 </div>
             </button>
-            <button onclick="toggleCartModal(true)" class="bg-gray-900 text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition-all">
+            <button onclick="toggleCartModal(true)" class="bg-gray-900 text-white px-10 py-4 rounded-2xl font-black text-base shadow-lg active:scale-95 transition-all">
                 預覽訂單
             </button>
         </div>
@@ -119,17 +120,17 @@
     <div id="selection-drawer" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[60] hidden flex items-end justify-center transition-opacity">
         <div class="bg-white w-full max-w-lg rounded-t-[32px] drawer-animate-in flex flex-col max-h-[85vh]">
             <div class="p-6 pb-4 flex justify-between items-start border-b border-gray-100 relative">
-                <div class="pr-8">
-                    <h3 id="drawer-title" class="text-xl font-black text-gray-800 leading-tight mb-1">品項名稱</h3>
-                    <p id="drawer-subtitle" class="text-xs font-bold text-gray-400">請選擇需要的規格與數量</p>
+                <div class="pr-10">
+                    <h3 id="drawer-title" class="text-2xl font-black text-gray-800 leading-tight mb-1">品項名稱</h3>
+                    <p id="drawer-subtitle" class="text-sm font-bold text-gray-400">請選擇需要的規格與數量</p>
                 </div>
-                <button onclick="closeDrawer()" class="bg-gray-100 text-gray-400 p-2 rounded-full absolute top-5 right-5 active:bg-gray-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button onclick="closeDrawer()" class="bg-gray-100 text-gray-400 p-2.5 rounded-full absolute top-5 right-5 active:bg-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div id="drawer-content" class="p-4 space-y-2 overflow-y-auto no-scrollbar flex-1 bg-gray-50/50"></div>
-            <div class="p-5 bg-white border-t border-gray-100 pb-8 sm:pb-5">
-                <button onclick="closeDrawer()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">
+            <div id="drawer-content" class="p-5 space-y-3 overflow-y-auto no-scrollbar flex-1 bg-gray-50/50"></div>
+            <div class="p-6 bg-white border-t border-gray-100 pb-10 sm:pb-6">
+                <button onclick="closeDrawer()" class="w-full bg-orange-600 text-white py-4.5 rounded-2xl font-black text-xl shadow-lg shadow-orange-200 active:scale-[0.98] transition-all py-4">
                     確認選取並返回
                 </button>
             </div>
@@ -138,46 +139,46 @@
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-6">
-        <div class="bg-white w-full max-sm rounded-[32px] p-6 space-y-6 shadow-2xl">
-            <h3 class="text-xl font-black text-center text-gray-800">用餐設定</h3>
-            <div class="space-y-5">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-8 space-y-8 shadow-2xl">
+            <h3 class="text-2xl font-black text-center text-gray-800">用餐設定</h3>
+            <div class="space-y-6">
                 <div>
-                    <label class="text-xs font-bold text-gray-400 block mb-2 px-1">請選擇用餐方式</label>
-                    <div class="flex bg-gray-100 p-1.5 rounded-2xl">
-                        <button id="set-in" onclick="updateTempSettings('type', '內用')" class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white shadow-sm text-orange-600">內用</button>
-                        <button id="set-out" onclick="updateTempSettings('type', '外帶')" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-400">外帶</button>
+                    <label class="text-sm font-bold text-gray-400 block mb-3 px-1">請選擇用餐方式</label>
+                    <div class="flex bg-gray-100 p-2 rounded-2xl">
+                        <button id="set-in" onclick="updateTempSettings('type', '內用')" class="flex-1 py-3.5 rounded-xl text-base font-bold bg-white shadow-sm text-orange-600">內用</button>
+                        <button id="set-out" onclick="updateTempSettings('type', '外帶')" class="flex-1 py-3.5 rounded-xl text-base font-bold text-gray-400">外帶</button>
                     </div>
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-gray-400 block mb-2 px-1">輸入桌號 / 識別名稱</label>
-                    <input type="text" id="set-table" placeholder="例：3桌 或 王先生" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-sm font-bold outline-none">
+                    <label class="text-sm font-bold text-gray-400 block mb-3 px-1">輸入桌號 / 識別名稱</label>
+                    <input type="text" id="set-table" placeholder="例：3桌 或 王先生" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-base font-bold outline-none focus:border-orange-500 transition-colors">
                 </div>
             </div>
-            <button onclick="saveSettings()" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg active:scale-[0.98]">儲存設定</button>
+            <button onclick="saveSettings()" class="w-full bg-gray-900 text-white py-5 rounded-2xl font-black text-xl active:scale-[0.98]">儲存設定</button>
         </div>
     </div>
 
     <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-t-[32px] sm:rounded-[32px] max-h-[85vh] flex flex-col">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <div class="p-7 border-b border-gray-100 flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-black text-gray-800">訂單明細</h3>
-                    <p class="text-xs font-bold text-orange-600 mt-1" id="modal-info-text">內用 / 桌號未填</p>
+                    <h3 class="text-2xl font-black text-gray-800">訂單明細</h3>
+                    <p class="text-sm font-bold text-orange-600 mt-1" id="modal-info-text">內用 / 桌號未填</p>
                 </div>
-                <button onclick="toggleCartModal(false)" class="p-2 bg-gray-100 rounded-full text-gray-400 active:bg-gray-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button onclick="toggleCartModal(false)" class="p-2.5 bg-gray-100 rounded-full text-gray-400 active:bg-gray-200">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar bg-gray-50"></div>
-            <div class="p-6 bg-white border-t rounded-b-[32px] pb-8 sm:pb-6">
-                <div class="flex justify-between items-end mb-6">
-                    <span class="font-bold text-gray-400 text-sm">結帳總金額</span>
-                    <span class="text-3xl font-black text-red-600">NT$ <span id="modal-total-price">0</span></span>
+            <div id="cart-items-list" class="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar bg-gray-50"></div>
+            <div class="p-7 bg-white border-t rounded-b-[32px] pb-10 sm:pb-7">
+                <div class="flex justify-between items-end mb-8">
+                    <span class="font-bold text-gray-400 text-base">結帳總金額</span>
+                    <span class="text-4xl font-black text-red-600">NT$ <span id="modal-total-price">0</span></span>
                 </div>
-                <button onclick="submitOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black text-xl shadow-xl shadow-red-200 flex justify-center items-center space-x-2">
+                <button onclick="submitOrder()" class="w-full bg-red-600 text-white py-5 rounded-2xl font-black text-2xl shadow-xl shadow-red-200 flex justify-center items-center space-x-3">
                     <span>送出廚房製作</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </div>
         </div>
@@ -235,7 +236,7 @@
             Object.keys(menuData).forEach(category => {
                 const container = document.getElementById(`menu-${category}`);
                 if (!container) return;
-                container.innerHTML = ''; // 清空舊內容
+                container.innerHTML = ''; 
                 menuData[category].forEach((item) => {
                     container.innerHTML += createCompactCard(category, item);
                 });
@@ -246,15 +247,15 @@
             const displayPrice = item.price || item.base;
             const priceSuffix = item.base ? ' 起' : '';
             return `
-            <div id="card-${item.id}" onclick="openDrawer('${category}', '${item.id}')" class="item-card bg-white p-4 rounded-[20px] border border-gray-100 shadow-sm flex flex-col justify-between min-h-[110px] cursor-pointer relative overflow-hidden">
-                <h3 class="font-bold text-gray-800 text-sm leading-snug">${item.name}</h3>
-                <div class="mt-2 flex justify-between items-end">
-                    <span class="text-sm font-black text-orange-600">$${displayPrice}${priceSuffix}</span>
-                    <div class="w-7 h-7 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+            <div id="card-${item.id}" onclick="openDrawer('${category}', '${item.id}')" class="item-card bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col justify-between min-h-[130px] cursor-pointer relative overflow-hidden">
+                <h3 class="font-bold text-gray-800 text-base leading-snug">${item.name}</h3>
+                <div class="mt-3 flex justify-between items-end">
+                    <span class="text-base font-black text-orange-600">$${displayPrice}${priceSuffix}</span>
+                    <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
                     </div>
                 </div>
-                <div id="badge-${item.id}" class="absolute top-0 right-0 w-8 h-8 bg-red-500 text-white text-[10px] font-black rounded-bl-[15px] flex items-center justify-center hidden opacity-90">0</div>
+                <div id="badge-${item.id}" class="absolute top-0 right-0 w-10 h-10 bg-red-500 text-white text-xs font-black rounded-bl-[18px] flex items-center justify-center hidden opacity-90">0</div>
             </div>`;
         }
 
@@ -285,11 +286,11 @@
                     const basePrice = isBaked ? item.baked : item.base;
                     const upFee = isBaked ? 30 : 20;
                     content.innerHTML += `
-                        <div class="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-                            <p class="text-xs font-black text-orange-600 mb-3 bg-orange-50 inline-block px-2 py-1 rounded-md">${t} 系列</p>
-                            <div class="space-y-4">
+                        <div class="bg-white rounded-2xl p-5 mb-4 border border-gray-100 shadow-sm">
+                            <p class="text-sm font-black text-orange-600 mb-4 bg-orange-50 inline-block px-3 py-1 rounded-md">${t} 系列</p>
+                            <div class="space-y-5">
                                 ${createDrawerRow(`${item.id}-${t}`, `正常份量`, basePrice)}
-                                <div class="border-t border-gray-100/50 pt-3">
+                                <div class="border-t border-gray-100/50 pt-4">
                                     ${createDrawerRow(`${item.id}-${t}-加大`, `加大份量`, basePrice + upFee, true)}
                                 </div>
                             </div>
@@ -300,17 +301,17 @@
 
         function createDrawerRow(keyId, label, price, isUpgrade = false) {
             const currentQty = getCartQty(keyId);
-            const titleClass = isUpgrade ? "font-bold text-gray-700 text-sm" : "font-bold text-gray-800 text-sm";
+            const titleClass = isUpgrade ? "font-bold text-gray-700 text-base" : "font-bold text-gray-800 text-base";
             return `
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="${titleClass}">${label}</p>
-                        <p class="text-sm font-black text-orange-500 mt-0.5">$${price}</p>
+                        <p class="text-base font-black text-orange-500 mt-1">$${price}</p>
                     </div>
-                    <div class="flex items-center space-x-4 bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-xl">
-                        <button onclick="changeQty('${keyId}', '${label}', ${price}, -1)" class="w-8 h-8 flex items-center justify-center font-black text-gray-400">-</button>
-                        <span id="drawer-qty-${keyId}" class="text-base font-black w-4 text-center text-gray-800">${currentQty}</span>
-                        <button onclick="changeQty('${keyId}', '${label}', ${price}, 1)" class="w-8 h-8 flex items-center justify-center font-black text-orange-600">+</button>
+                    <div class="flex items-center space-x-5 bg-gray-50 border border-gray-200 px-3 py-2 rounded-2xl">
+                        <button onclick="changeQty('${keyId}', '${label}', ${price}, -1)" class="w-10 h-10 flex items-center justify-center text-xl font-black text-gray-400 active:scale-90">-</button>
+                        <span id="drawer-qty-${keyId}" class="text-lg font-black w-6 text-center text-gray-800">${currentQty}</span>
+                        <button onclick="changeQty('${keyId}', '${label}', ${price}, 1)" class="w-10 h-10 flex items-center justify-center text-xl font-black text-orange-600 active:scale-90">+</button>
                     </div>
                 </div>`;
         }
@@ -365,7 +366,6 @@
             badge.classList.toggle('scale-0', count === 0);
             badge.classList.toggle('scale-100', count > 0);
 
-            // 更新主菜單的小卡片紅點
             document.querySelectorAll('[id^="badge-"]').forEach(b => {
                 const id = b.id.replace('badge-', '');
                 const itemTotal = mainIdCounts[id] || 0;
@@ -382,8 +382,8 @@
         function updateTempSettings(key, val) {
             tempSettings[key] = val;
             const isIn = tempSettings.type === '內用';
-            document.getElementById('set-in').className = isIn ? "flex-1 py-2.5 rounded-xl text-sm font-bold bg-white shadow-sm text-orange-600" : "flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-400";
-            document.getElementById('set-out').className = !isIn ? "flex-1 py-2.5 rounded-xl text-sm font-bold bg-white shadow-sm text-orange-600" : "flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-400";
+            document.getElementById('set-in').className = isIn ? "flex-1 py-3.5 rounded-xl text-base font-bold bg-white shadow-sm text-orange-600" : "flex-1 py-3.5 rounded-xl text-base font-bold text-gray-400";
+            document.getElementById('set-out').className = !isIn ? "flex-1 py-3.5 rounded-xl text-base font-bold bg-white shadow-sm text-orange-600" : "flex-1 py-3.5 rounded-xl text-base font-bold text-gray-400";
         }
 
         function saveSettings() {
@@ -400,19 +400,19 @@
             if (show) {
                 const list = document.getElementById('cart-items-list');
                 list.innerHTML = cart.map(i => `
-                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                         <div class="flex-1 pr-4">
-                            <p class="font-bold text-gray-800 text-sm leading-tight mb-1">${i.name}</p>
-                            <p class="text-[11px] text-gray-400 font-bold bg-gray-50 inline-block px-2 py-0.5 rounded-md">$${i.price} x ${i.qty}</p>
+                            <p class="font-bold text-gray-800 text-base leading-tight mb-2">${i.name}</p>
+                            <p class="text-xs font-bold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">$${i.price} x ${i.qty}</p>
                         </div>
-                        <p class="font-black text-orange-600 text-base">NT$ ${(i.price * i.qty).toLocaleString()}</p>
+                        <p class="font-black text-orange-600 text-lg">NT$ ${(i.price * i.qty).toLocaleString()}</p>
                     </div>`).join('');
             }
         }
 
         function showToast(msg) {
             const t = document.createElement('div');
-            t.className = "fixed top-[90px] left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur text-white px-6 py-3 rounded-full text-sm font-bold z-[200]";
+            t.className = "fixed top-[100px] left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur text-white px-8 py-4 rounded-full text-base font-bold z-[200]";
             t.innerText = msg;
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 2000);
@@ -424,16 +424,16 @@
                 toggleCartModal(false); toggleSettingsModal(true); return; 
             }
             document.body.innerHTML += `<div class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center p-8 drawer-animate-in">
-                <div class="w-24 h-24 bg-green-500 text-white rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-green-200"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg></div>
-                <h2 class="text-3xl font-black text-gray-800 mb-2">訂單已送出</h2>
-                <button onclick="location.reload()" class="w-full max-w-xs bg-gray-900 text-white py-4 rounded-2xl font-black text-lg">返回首頁</button>
+                <div class="w-28 h-28 bg-green-500 text-white rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-green-200"><svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg></div>
+                <h2 class="text-4xl font-black text-gray-800 mb-4">訂單已送出</h2>
+                <button onclick="location.reload()" class="w-full max-w-xs bg-gray-900 text-white py-5 rounded-2xl font-black text-xl">返回首頁</button>
             </div>`;
         }
 
         function scrollToCategory(id, btnElement) {
             const el = document.getElementById(id);
             if (!el) return;
-            window.scrollTo({ top: el.offsetTop - 140, behavior: 'smooth' });
+            window.scrollTo({ top: el.offsetTop - 150, behavior: 'smooth' });
             document.querySelectorAll('.category-tab').forEach(btn => btn.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
         }
