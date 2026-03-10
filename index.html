@@ -12,7 +12,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
-            font-size: 16px; /* 提升基礎字級 */
+            font-size: 16px;
         }
 
         .category-tab.active {
@@ -51,7 +51,7 @@
             <button onclick="toggleSettingsModal(true)" class="bg-gray-50 border border-gray-100 px-4 py-2 rounded-xl flex items-center space-x-2 active:bg-gray-100 transition">
                 <div class="flex flex-col text-right">
                     <span id="order-type-display" class="text-sm font-black text-orange-600">內用</span>
-                    <span id="table-display" class="text-sm font-bold text-gray-500">未填桌號</span>
+                    <span id="table-display" class="text-xs font-bold text-gray-500">未填桌號</span>
                 </div>
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </button>
@@ -130,7 +130,7 @@
             </div>
             <div id="drawer-content" class="p-5 space-y-3 overflow-y-auto no-scrollbar flex-1 bg-gray-50/50"></div>
             <div class="p-6 bg-white border-t border-gray-100 pb-10 sm:pb-6">
-                <button onclick="closeDrawer()" class="w-full bg-orange-600 text-white py-4.5 rounded-2xl font-black text-xl shadow-lg shadow-orange-200 active:scale-[0.98] transition-all py-4">
+                <button onclick="closeDrawer()" class="w-full bg-orange-600 text-white py-4.5 rounded-2xl font-black text-xl shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">
                     確認選取並返回
                 </button>
             </div>
@@ -170,6 +170,7 @@
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
+            <!-- 修改點：增加一個清空購物車提示，或是清單 -->
             <div id="cart-items-list" class="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar bg-gray-50"></div>
             <div class="p-7 bg-white border-t rounded-b-[32px] pb-10 sm:pb-7">
                 <div class="flex justify-between items-end mb-8">
@@ -325,10 +326,24 @@
             return item ? item.qty : 0;
         }
 
+        // 修改點：加強 changeQty，並確保介面同步更新
         function changeQty(keyId, subName, price, delta) {
             const idx = cart.findIndex(i => i.key === keyId);
-            const mainId = document.getElementById('drawer-title').dataset.currentId;
-            const mainName = document.getElementById('drawer-title').innerText;
+            const drawerTitle = document.getElementById('drawer-title');
+            
+            // 判斷當前是在 Drawer 還是 Cart Modal 中操作
+            // 如果是從 Cart Modal 觸發，我們需要手動帶入 mainId
+            let mainId, mainName;
+            if (drawerTitle.dataset.currentId) {
+                mainId = drawerTitle.dataset.currentId;
+                mainName = drawerTitle.innerText;
+            } else {
+                // 如果在購物車中，從 key 解析或使用現有的 item 資料
+                const existingItem = cart[idx];
+                if (!existingItem) return;
+                mainId = existingItem.mainId;
+                mainName = existingItem.name.split(' (')[0]; 
+            }
             
             let currentQty = idx > -1 ? cart[idx].qty : 0;
             let newQty = currentQty + delta;
@@ -338,14 +353,34 @@
                 if (newQty === 0) cart.splice(idx, 1);
                 else cart[idx].qty = newQty;
             } else if (newQty > 0) {
-                const fullName = subName === '單點一份' ? mainName : `${mainName} (${subName})`;
+                const fullName = subName === '單點一份' ? mainName : (subName.includes('(') ? subName : `${mainName} (${subName})`);
                 cart.push({ key: keyId, mainId: mainId, name: fullName, price, qty: newQty });
             }
 
-            const label = document.getElementById(`drawer-qty-${keyId}`);
-            if (label) label.innerText = newQty;
+            // 同步更新 Drawer UI (如果開著)
+            const drawerLabel = document.getElementById(`drawer-qty-${keyId}`);
+            if (drawerLabel) drawerLabel.innerText = newQty;
+
+            // 同步更新 Cart UI (如果開著)
+            const cartLabel = document.getElementById(`cart-qty-${keyId}`);
+            if (cartLabel) {
+                if (newQty === 0) {
+                    // 如果數量歸零，重新渲染整份清單比較乾淨
+                    renderCartItems();
+                } else {
+                    cartLabel.innerText = newQty;
+                    // 更新單品小計
+                    const subtotalLabel = document.getElementById(`cart-subtotal-${keyId}`);
+                    if (subtotalLabel) subtotalLabel.innerText = (price * newQty).toLocaleString();
+                }
+            }
 
             syncSummary();
+
+            // 如果購物車清空了，關閉視窗
+            if (cart.length === 0 && !document.getElementById('cart-modal').classList.contains('hidden')) {
+                toggleCartModal(false);
+            }
         }
 
         function syncSummary() {
@@ -398,16 +433,37 @@
             if (show && cart.length === 0) { showToast('購物車內目前空空的喔！'); return; }
             document.getElementById('cart-modal').classList.toggle('hidden', !show);
             if (show) {
-                const list = document.getElementById('cart-items-list');
-                list.innerHTML = cart.map(i => `
-                    <div class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex-1 pr-4">
-                            <p class="font-bold text-gray-800 text-base leading-tight mb-2">${i.name}</p>
-                            <p class="text-xs font-bold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">$${i.price} x ${i.qty}</p>
-                        </div>
-                        <p class="font-black text-orange-600 text-lg">NT$ ${(i.price * i.qty).toLocaleString()}</p>
-                    </div>`).join('');
+                // 打開購物車時，清除 Drawer 的狀態快取，避免 changeQty 抓錯 mainId
+                document.getElementById('drawer-title').dataset.currentId = "";
+                renderCartItems();
             }
+        }
+
+        // 修改點：抽離出購物車清單渲染邏輯，方便即時更新
+        function renderCartItems() {
+            const list = document.getElementById('cart-items-list');
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="text-center py-10"><p class="text-gray-400 font-bold">訂單是空的</p></div>`;
+                return;
+            }
+            list.innerHTML = cart.map(i => `
+                <div class="flex flex-col bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1 pr-4">
+                            <p class="font-bold text-gray-800 text-base leading-tight">${i.name}</p>
+                            <p class="text-xs font-bold text-gray-400 mt-1">$${i.price} / 份</p>
+                        </div>
+                        <p class="font-black text-orange-600 text-lg">NT$ <span id="cart-subtotal-${i.key}">${(i.price * i.qty).toLocaleString()}</span></p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-50">
+                        <span class="text-xs font-bold text-gray-300">修改數量</span>
+                        <div class="flex items-center space-x-6 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl">
+                            <button onclick="changeQty('${i.key}', '${i.name}', ${i.price}, -1)" class="w-8 h-8 flex items-center justify-center text-xl font-black text-gray-400 active:scale-90">-</button>
+                            <span id="cart-qty-${i.key}" class="text-lg font-black w-6 text-center text-gray-800">${i.qty}</span>
+                            <button onclick="changeQty('${i.key}', '${i.name}', ${i.price}, 1)" class="w-8 h-8 flex items-center justify-center text-xl font-black text-orange-600 active:scale-90">+</button>
+                        </div>
+                    </div>
+                </div>`).join('');
         }
 
         function showToast(msg) {
