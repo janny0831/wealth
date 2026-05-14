@@ -1,498 +1,503 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>戀焗 複合式焗烤屋 - 點餐系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加班申請單 - Overtime Request Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap');
         
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8fafc;
-            -webkit-tap-highlight-color: transparent;
-            font-size: 16px;
+            font-family: 'Noto Sans TC', 'Noto Sans Thai', sans-serif;
+            background-color: #f3f4f6;
         }
 
-        .category-tab.active {
-            background-color: #ea580c;
-            color: white;
-            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            width: 1100px; 
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .item-card { transition: all 0.15s ease; }
-        .item-card:active { transform: scale(0.96); background-color: #fff7ed; }
-
-        .drawer-animate-in {
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        .sticky-summary { box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.08); }
+        th, td {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+            vertical-align: middle;
+            height: 60px;
+            overflow: visible;
+        }
+
+        select, input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            text-align: center;
+            text-align-last: center;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            display: block;
+            line-height: 1.2;
+            font-size: 13px;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .type-select {
+            font-size: 10px;
+            background-color: #fffbeb; 
+            border: 1px solid #fcd34d !important; 
+            border-radius: 4px; 
+            height: 20px !important;
+            margin-top: -4px;
+            padding: 0 1px;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        .translating {
+            background-color: #f0f9ff !important;
+            color: #0369a1;
+            font-style: italic;
+        }
+
+        .export-text-overlay {
+            display: none;
+            font-size: 10px;
+            font-weight: bold;
+            color: #b45309;
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 4px;
+            width: 100%;
+            padding: 1px 0;
+            margin-top: -4px;
+        }
+
+        @media print {
+            .no-print-area { display: none; }
+            body { background-color: white; padding: 0; }
+            .form-container { box-shadow: none; margin: 0; width: 100%; }
+        }
     </style>
 </head>
-<body class="pb-32">
+<body class="p-4">
 
-    <!-- Header -->
-    <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
-        <div class="max-w-4xl mx-auto p-4 flex justify-between items-center">
-            <div class="flex flex-col">
-                <h1 class="text-2xl font-black text-orange-600 tracking-tight">戀焗</h1>
-                <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Pasta & Gratin</p>
-            </div>
-            
-            <button onclick="toggleSettingsModal(true)" class="bg-gray-50 border border-gray-100 px-4 py-2 rounded-xl flex items-center space-x-2 active:bg-gray-100 transition">
-                <div class="flex flex-col text-right">
-                    <span id="order-type-display" class="text-sm font-black text-orange-600">內用</span>
-                    <span id="table-display" class="text-xs font-bold text-gray-500">未填桌號</span>
-                </div>
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6 flex flex-wrap gap-4 no-print-area justify-start items-center">
+            <button onclick="exportToImage()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow-md transition flex items-center gap-2">
+                匯出圖片 (Export Image)
+            </button>
+            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow-md transition flex items-center gap-2">
+                匯出 Excel (Export XLSX)
+            </button>
+            <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow-md transition flex items-center gap-2">
+                列印 (Print)
+            </button>
+            <button onclick="clearAllData()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow-md transition flex items-center gap-2">
+                一鍵清空 (ล้างข้อมูล)
             </button>
         </div>
-    </header>
 
-    <!-- Category Tabs -->
-    <nav id="category-nav" class="bg-white/95 backdrop-blur-md sticky top-[72px] z-30 border-b overflow-x-auto whitespace-nowrap px-4 py-4 no-scrollbar shadow-sm">
-        <button onclick="scrollToCategory('cat-set', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 active transition-colors">簡餐</button>
-        <button onclick="scrollToCategory('cat-noodle', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">暖心湯麵</button>
-        <button onclick="scrollToCategory('cat-pasta', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">義式/焗烤</button>
-        <button onclick="scrollToCategory('cat-snack', this)" class="category-tab inline-block px-6 py-2.5 rounded-full text-base font-bold mr-2 bg-gray-100 text-gray-500 transition-colors">飲品小點</button>
-    </nav>
-
-    <main class="max-w-4xl mx-auto p-4 space-y-10">
-        <section id="cat-set" class="scroll-mt-[150px]">
-            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
-                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>簡餐系列
-                <span class="ml-2 text-xs text-gray-400 font-bold bg-gray-100 px-2.5 py-1 rounded-full">附餐:白飯/湯/配菜</span>
-            </h2>
-            <div class="grid grid-cols-2 gap-4" id="menu-sets"></div>
-        </section>
-
-        <section id="cat-noodle" class="scroll-mt-[150px]">
-            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
-                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>暖心湯麵
-            </h2>
-            <div class="grid grid-cols-2 gap-4" id="menu-noodles"></div>
-        </section>
-
-        <section id="cat-pasta" class="scroll-mt-[150px]">
-            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
-                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>義式 / 焗烤
-            </h2>
-            <div class="grid grid-cols-2 gap-4" id="menu-pasta"></div>
-        </section>
-
-        <section id="cat-snack" class="scroll-mt-[150px]">
-            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center">
-                <span class="w-2 h-6 bg-orange-500 rounded-full mr-2"></span>飲料與小點
-            </h2>
-            <div class="grid grid-cols-2 gap-4" id="menu-snacks"></div>
-        </section>
-    </main>
-
-    <!-- Bottom Action Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white sticky-summary z-40 px-4 py-5 sm:pb-5 pb-10 border-t">
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <button onclick="toggleCartModal(true)" class="flex items-center space-x-4 group relative pl-2">
-                <div class="relative bg-orange-100 text-orange-600 p-3.5 rounded-2xl group-active:scale-95 transition-transform">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    <span id="total-qty" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-7 h-7 flex items-center justify-center rounded-full border-2 border-white font-black shadow-sm transition-all scale-0 origin-center">0</span>
-                </div>
-                <div class="text-left">
-                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">總金額</p>
-                    <p class="text-2xl font-black text-gray-800">NT$ <span id="total-price">0</span></p>
-                </div>
-            </button>
-            <button onclick="toggleCartModal(true)" class="bg-gray-900 text-white px-10 py-4 rounded-2xl font-black text-base shadow-lg active:scale-95 transition-all">
-                預覽訂單
-            </button>
-        </div>
-    </div>
-
-    <!-- Selection Drawer -->
-    <div id="selection-drawer" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[60] hidden flex items-end justify-center transition-opacity">
-        <div class="bg-white w-full max-w-lg rounded-t-[32px] drawer-animate-in flex flex-col max-h-[85vh]">
-            <div class="p-6 pb-4 flex justify-between items-start border-b border-gray-100 relative">
-                <div class="pr-10">
-                    <h3 id="drawer-title" class="text-2xl font-black text-gray-800 leading-tight mb-1">品項名稱</h3>
-                    <p id="drawer-subtitle" class="text-sm font-bold text-gray-400">請選擇需要的規格與數量</p>
-                </div>
-                <button onclick="closeDrawer()" class="bg-gray-100 text-gray-400 p-2.5 rounded-full absolute top-5 right-5 active:bg-gray-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+        <div id="ot-form" class="form-container shadow-xl">
+            <div class="text-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">大量科技股份有限公司</h2>
+                <h1 class="text-xl font-bold text-gray-700">加班申請單 (แบบฟอร์มขอทำงานล่วงเวลา)</h1>
             </div>
-            <div id="drawer-content" class="p-5 space-y-3 overflow-y-auto no-scrollbar flex-1 bg-gray-50/50"></div>
-            <div class="p-6 bg-white border-t border-gray-100 pb-10 sm:pb-6">
-                <button onclick="closeDrawer()" class="w-full bg-orange-600 text-white py-4.5 rounded-2xl font-black text-xl shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">
-                    確認選取並返回
-                </button>
+
+            <div class="flex justify-between mb-4 px-2">
+                <div class="flex items-center">
+                    <span class="font-bold mr-2 text-sm">日期 (วันที่):</span>
+                    <input type="date" id="doc_date" class="border-b border-black w-40 text-left px-2 h-auto" onchange="autoSyncRecords()">
+                </div>
+                <div><span class="font-bold text-gray-800 underline text-sm">單位：管理部 (Unit: HR Department)</span></div>
+            </div>
+
+            <table>
+                <thead class="bg-gray-100 text-[12px]">
+                    <tr>
+                        <th class="w-20 font-bold">工號<br><span class="text-[9px] text-gray-500 font-normal">รหัสพนักงาน</span></th>
+                        <th class="w-24 font-bold">姓名<br><span class="text-[9px] text-gray-500 font-normal">ชื่อ</span></th>
+                        <th class="w-28 font-bold">月/日<br><span class="text-[9px] text-gray-500 font-normal">เดือน/วัน</span></th>
+                        <th class="w-48 font-bold" colspan="2">開始/結束時間 (24H)<br><span class="text-[9px] text-gray-500 font-normal">เวลาเริ่มต้น - สิ้นสุด</span></th>
+                        <th class="w-16 font-bold">時數<br><span class="text-[9px] text-gray-500 font-normal">ชม.</span></th>
+                        <th class="w-40 font-bold">工作內容<br><span class="text-[9px] text-gray-500 font-normal">ทำงานอะไร</span></th>
+                        <th class="font-bold">備註 (支援泰文自動翻譯)<br><span class="text-[9px] text-gray-500 font-normal">หมายเหตุ (แปลอัตโนมัติ)</span></th>
+                    </tr>
+                </thead>
+                <tbody id="ot-tbody">
+                    </tbody>
+            </table>
+
+            <div class="mt-8 flex justify-between items-end px-2">
+                <div class="text-[11px] text-blue-700 font-bold">
+                    * 13056 扣除邏輯：平日(12-13, 15-15:30) / 假日(7:30-8, 12-13, 17-17:30)<br>
+                    * 其他工號扣除邏輯：(12-13, 17-17:30)
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-[32px] p-8 space-y-8 shadow-2xl">
-            <h3 class="text-2xl font-black text-center text-gray-800">用餐設定</h3>
-            <div class="space-y-6">
-                <div>
-                    <label class="text-sm font-bold text-gray-400 block mb-3 px-1">請選擇用餐方式</label>
-                    <div class="flex bg-gray-100 p-2 rounded-2xl">
-                        <button id="set-in" onclick="updateTempSettings('type', '內用')" class="flex-1 py-3.5 rounded-xl text-base font-bold bg-white shadow-sm text-orange-600">內用</button>
-                        <button id="set-out" onclick="updateTempSettings('type', '外帶')" class="flex-1 py-3.5 rounded-xl text-base font-bold text-gray-400">外帶</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-sm font-bold text-gray-400 block mb-3 px-1">輸入桌號 / 識別名稱</label>
-                    <input type="text" id="set-table" placeholder="例：3桌 或 王先生" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-base font-bold outline-none focus:border-orange-500 transition-colors">
-                </div>
-            </div>
-            <button onclick="saveSettings()" class="w-full bg-gray-900 text-white py-5 rounded-2xl font-black text-xl active:scale-[0.98]">儲存設定</button>
-        </div>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    <!-- Cart Modal -->
-    <div id="cart-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] hidden flex items-end sm:items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-t-[32px] sm:rounded-[32px] max-h-[85vh] flex flex-col">
-            <div class="p-7 border-b border-gray-100 flex justify-between items-center">
-                <div>
-                    <h3 class="text-2xl font-black text-gray-800">訂單明細</h3>
-                    <p class="text-sm font-bold text-orange-600 mt-1" id="modal-info-text">內用 / 桌號未填</p>
-                </div>
-                <button onclick="toggleCartModal(false)" class="p-2.5 bg-gray-100 rounded-full text-gray-400 active:bg-gray-200">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <!-- 修改點：增加一個清空購物車提示，或是清單 -->
-            <div id="cart-items-list" class="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar bg-gray-50"></div>
-            <div class="p-7 bg-white border-t rounded-b-[32px] pb-10 sm:pb-7">
-                <div class="flex justify-between items-end mb-8">
-                    <span class="font-bold text-gray-400 text-base">結帳總金額</span>
-                    <span class="text-4xl font-black text-red-600">NT$ <span id="modal-total-price">0</span></span>
-                </div>
-                <button onclick="submitOrder()" class="w-full bg-red-600 text-white py-5 rounded-2xl font-black text-2xl shadow-xl shadow-red-200 flex justify-center items-center space-x-3">
-                    <span>送出廚房製作</span>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const menuData = {
-            sets: [
-                { id: 's1', name: '香酥脆皮雞腿排飯', price: 130 },
-                { id: 's2', name: '北海道鯖魚飯', price: 120 },
-                { id: 's3', name: '轟炸大魷魚飯', price: 140 },
-                { id: 's4', name: '三杯鯖魚飯', price: 140 },
-                { id: 's5', name: '三杯雞飯', price: 130 },
-                { id: 's6', name: '糖醋雞肉飯', price: 100 }
-            ],
-            noodles: [
-                { id: 'n1', name: '咖哩手工湯麵', price: 130, subs: ['手工拉麵','意麵','冬粉','王子麵','飯'] },
-                { id: 'n2', name: '海鮮手工湯麵', price: 130, subs: ['手工拉麵','意麵','冬粉','王子麵','飯'] },
-                { id: 'n3', name: '泡菜手工湯麵', price: 130, subs: ['手工拉麵','意麵','冬粉','王子麵','飯'] },
-                { id: 'n4', name: '牛奶起士鍋', price: 130, subs: ['附白飯','手工拉麵','意麵','冬粉','王子麵'] }
-            ],
-            pasta: [
-                { id: 'p1', name: '義大利肉醬', base: 70, baked: 110 },
-                { id: 'p2', name: '田園鮮菇蔬菜(素)', base: 80, baked: 120 },
-                { id: 'p3', name: '蒜味紅/白醬培根', base: 80, baked: 120 },
-                { id: 'p4', name: '蒜味培根海鮮', base: 100, baked: 140 },
-                { id: 'p5', name: '蒜味紅/白醬蛤蜊', base: 90, baked: 130 },
-                { id: 'p6', name: '蒜味紅/白醬雞肉', base: 90, baked: 130 },
-                { id: 'p7', name: '蒜味紅/白醬牛肉', base: 100, baked: 140 },
-                { id: 'p8', name: '青醬辣味嫩雞', base: 110, baked: 150 },
-                { id: 'p9', name: '南瓜海鮮', base: 120, baked: 160 },
-                { id: 'p10', name: '紅/白/咖哩雞腿排', base: 130, baked: 170 },
-                { id: 'p11', name: '蒜味紅醬炸魷魚', base: 140, baked: 180 }
-            ],
-            snacks: [
-                { id: 'd1', name: '可樂', price: 30 },
-                { id: 'd2', name: '薰衣草奶茶', price: 30 },
-                { id: 'd3', name: '冰糖咖啡紅茶', price: 30 },
-                { id: 'sn1', name: '脆皮甜不辣', price: 30 },
-                { id: 'sn2', name: '脆薯', price: 40 },
-                { id: 'sn3', name: '雞塊', price: 50 }
-            ]
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-PCNtremx3bmUZk-tk7LLo-zuIaD4yn8",
+            authDomain: "thailand-26530.firebaseapp.com",
+            projectId: "thailand-26530",
+            storageBucket: "thailand-26530.firebasestorage.app",
+            messagingSenderId: "383864827104",
+            appId: "1:383864827104:web:3dfcebf1045debf494f485",
+            measurementId: "G-HCRB6KC4CN"
         };
 
-        let cart = []; 
-        let settings = { type: '內用', table: '' };
-        let tempSettings = { type: '內用' };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const docRef = doc(db, "ot_data", "current_sheet");
 
-        window.onload = () => {
-            renderMenu();
-            setTimeout(() => toggleSettingsModal(true), 500);
+        const empMap = {
+            "13031": "阿凱Krai",
+            "13056": "娜萌Mon"
         };
+        const jobOptions = ["管理部/แผนกบริหาร", "支援資材部/แผนกวัสดุ", "支援生產部/แผนกผลิต"];
 
-        function renderMenu() {
-            Object.keys(menuData).forEach(category => {
-                const container = document.getElementById(`menu-${category}`);
-                if (!container) return;
-                container.innerHTML = ''; 
-                menuData[category].forEach((item) => {
-                    container.innerHTML += createCompactCard(category, item);
-                });
-            });
-        }
-
-        function createCompactCard(category, item) {
-            const displayPrice = item.price || item.base;
-            const priceSuffix = item.base ? ' 起' : '';
-            return `
-            <div id="card-${item.id}" onclick="openDrawer('${category}', '${item.id}')" class="item-card bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col justify-between min-h-[130px] cursor-pointer relative overflow-hidden">
-                <h3 class="font-bold text-gray-800 text-base leading-snug">${item.name}</h3>
-                <div class="mt-3 flex justify-between items-end">
-                    <span class="text-base font-black text-orange-600">$${displayPrice}${priceSuffix}</span>
-                    <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                    </div>
-                </div>
-                <div id="badge-${item.id}" class="absolute top-0 right-0 w-10 h-10 bg-red-500 text-white text-xs font-black rounded-bl-[18px] flex items-center justify-center hidden opacity-90">0</div>
-            </div>`;
-        }
-
-        function openDrawer(category, itemId) {
-            const item = menuData[category].find(i => i.id === itemId);
-            if(!item) return;
-
-            const drawer = document.getElementById('selection-drawer');
-            const title = document.getElementById('drawer-title');
-            const content = document.getElementById('drawer-content');
-            
-            title.innerText = item.name;
-            title.dataset.currentId = item.id;
-            content.innerHTML = '';
-            drawer.classList.remove('hidden');
-
-            if (category === 'sets' || category === 'snacks') {
-                content.innerHTML = createDrawerRow(item.id, `單點一份`, item.price);
-            } 
-            else if (category === 'noodles') {
-                item.subs.forEach(sub => {
-                    content.innerHTML += createDrawerRow(`${item.id}-${sub}`, `搭配 ${sub}`, item.price);
-                });
-            } 
-            else if (category === 'pasta') {
-                ['麵', '燉飯', '焗飯', '焗麵'].forEach(t => {
-                    const isBaked = t.includes('焗');
-                    const basePrice = isBaked ? item.baked : item.base;
-                    const upFee = isBaked ? 30 : 20;
-                    content.innerHTML += `
-                        <div class="bg-white rounded-2xl p-5 mb-4 border border-gray-100 shadow-sm">
-                            <p class="text-sm font-black text-orange-600 mb-4 bg-orange-50 inline-block px-3 py-1 rounded-md">${t} 系列</p>
-                            <div class="space-y-5">
-                                ${createDrawerRow(`${item.id}-${t}`, `正常份量`, basePrice)}
-                                <div class="border-t border-gray-100/50 pt-4">
-                                    ${createDrawerRow(`${item.id}-${t}-加大`, `加大份量`, basePrice + upFee, true)}
-                                </div>
-                            </div>
-                        </div>`;
-                });
-            }
-        }
-
-        function createDrawerRow(keyId, label, price, isUpgrade = false) {
-            const currentQty = getCartQty(keyId);
-            const titleClass = isUpgrade ? "font-bold text-gray-700 text-base" : "font-bold text-gray-800 text-base";
-            return `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="${titleClass}">${label}</p>
-                        <p class="text-base font-black text-orange-500 mt-1">$${price}</p>
-                    </div>
-                    <div class="flex items-center space-x-5 bg-gray-50 border border-gray-200 px-3 py-2 rounded-2xl">
-                        <button onclick="changeQty('${keyId}', '${label}', ${price}, -1)" class="w-10 h-10 flex items-center justify-center text-xl font-black text-gray-400 active:scale-90">-</button>
-                        <span id="drawer-qty-${keyId}" class="text-lg font-black w-6 text-center text-gray-800">${currentQty}</span>
-                        <button onclick="changeQty('${keyId}', '${label}', ${price}, 1)" class="w-10 h-10 flex items-center justify-center text-xl font-black text-orange-600 active:scale-90">+</button>
-                    </div>
-                </div>`;
-        }
-
-        function closeDrawer() {
-            document.getElementById('selection-drawer').classList.add('hidden');
-        }
-
-        function getCartQty(keyId) {
-            const item = cart.find(i => i.key === keyId);
-            return item ? item.qty : 0;
-        }
-
-        // 修改點：加強 changeQty，並確保介面同步更新
-        function changeQty(keyId, subName, price, delta) {
-            const idx = cart.findIndex(i => i.key === keyId);
-            const drawerTitle = document.getElementById('drawer-title');
-            
-            // 判斷當前是在 Drawer 還是 Cart Modal 中操作
-            // 如果是從 Cart Modal 觸發，我們需要手動帶入 mainId
-            let mainId, mainName;
-            if (drawerTitle.dataset.currentId) {
-                mainId = drawerTitle.dataset.currentId;
-                mainName = drawerTitle.innerText;
-            } else {
-                // 如果在購物車中，從 key 解析或使用現有的 item 資料
-                const existingItem = cart[idx];
-                if (!existingItem) return;
-                mainId = existingItem.mainId;
-                mainName = existingItem.name.split(' (')[0]; 
-            }
-            
-            let currentQty = idx > -1 ? cart[idx].qty : 0;
-            let newQty = currentQty + delta;
-            if (newQty < 0) return;
-
-            if (idx > -1) {
-                if (newQty === 0) cart.splice(idx, 1);
-                else cart[idx].qty = newQty;
-            } else if (newQty > 0) {
-                const fullName = subName === '單點一份' ? mainName : (subName.includes('(') ? subName : `${mainName} (${subName})`);
-                cart.push({ key: keyId, mainId: mainId, name: fullName, price, qty: newQty });
-            }
-
-            // 同步更新 Drawer UI (如果開著)
-            const drawerLabel = document.getElementById(`drawer-qty-${keyId}`);
-            if (drawerLabel) drawerLabel.innerText = newQty;
-
-            // 同步更新 Cart UI (如果開著)
-            const cartLabel = document.getElementById(`cart-qty-${keyId}`);
-            if (cartLabel) {
-                if (newQty === 0) {
-                    // 如果數量歸零，重新渲染整份清單比較乾淨
-                    renderCartItems();
-                } else {
-                    cartLabel.innerText = newQty;
-                    // 更新單品小計
-                    const subtotalLabel = document.getElementById(`cart-subtotal-${keyId}`);
-                    if (subtotalLabel) subtotalLabel.innerText = (price * newQty).toLocaleString();
+        window.generateTimeOptions = function(val) {
+            let options = '';
+            for (let h = 0; h < 24; h++) {
+                for (let m = 0; m < 60; m += 30) {
+                    const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    const selected = (val === timeStr) ? 'selected' : '';
+                    options += `<option value="${timeStr}" ${selected}>${timeStr}</option>`;
                 }
             }
+            return options;
+        };
 
-            syncSummary();
+        window.handleDateChange = function(input) {
+            if (!input.value) return;
+            const dateObj = new Date(input.value);
+            const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            const d = dateObj.getDate().toString().padStart(2, '0');
+            input.setAttribute('data-display', `${m}/${d}`);
+            window.autoSyncRecords();
+        };
 
-            // 如果購物車清空了，關閉視窗
-            if (cart.length === 0 && !document.getElementById('cart-modal').classList.contains('hidden')) {
-                toggleCartModal(false);
+        window.handleRowEmpChange = function(sel) {
+            const row = sel.closest('tr');
+            const empId = sel.value;
+            const nameInput = row.querySelector('.emp-name');
+            const dayTypeSelect = row.querySelector('.day-type-select');
+            const dayContainer = row.querySelector('.day-container');
+            const otDayInput = row.querySelector('.ot-day');
+
+            nameInput.value = empMap[empId] || "";
+
+            if (empId === "13056") {
+                dayTypeSelect.classList.remove('hidden');
+                dayContainer.style.justifyContent = 'flex-start';
+                dayContainer.style.paddingTop = '2px';
+                otDayInput.style.marginTop = '0px';
+            } else {
+                dayTypeSelect.classList.add('hidden');
+                dayContainer.style.justifyContent = 'center';
+                dayContainer.style.paddingTop = '0px';
+                otDayInput.style.marginTop = '-2px';
+                dayTypeSelect.value = "平日";
             }
-        }
+            window.calculateRowHours(sel);
+        };
 
-        function syncSummary() {
-            let total = 0, count = 0;
-            const mainIdCounts = {};
+        window.calculateRowHours = function(el) {
+            const row = el.closest('tr');
+            const empId = row.querySelector('.emp-id').value;
+            const startStr = row.querySelector('.start-time').value;
+            const endStr = row.querySelector('.end-time').value;
+            const totalInput = row.querySelector('.total-hours');
+            const dayType = row.querySelector('.day-type-select').value;
 
-            cart.forEach(i => { 
-                total += i.price * i.qty; 
-                count += i.qty; 
-                mainIdCounts[i.mainId] = (mainIdCounts[i.mainId] || 0) + i.qty;
-            });
-            
-            document.getElementById('total-price').innerText = total.toLocaleString();
-            document.getElementById('modal-total-price').innerText = total.toLocaleString();
-            
-            const badge = document.getElementById('total-qty');
-            badge.innerText = count;
-            badge.classList.toggle('scale-0', count === 0);
-            badge.classList.toggle('scale-100', count > 0);
+            if (startStr && endStr) {
+                const toMinutes = (timeStr) => {
+                    const [h, m] = timeStr.split(':').map(Number);
+                    return h * 60 + m;
+                };
 
-            document.querySelectorAll('[id^="badge-"]').forEach(b => {
-                const id = b.id.replace('badge-', '');
-                const itemTotal = mainIdCounts[id] || 0;
-                b.innerText = itemTotal;
-                b.classList.toggle('hidden', itemTotal === 0);
-            });
-        }
+                let startMin = toMinutes(startStr);
+                let endMin = toMinutes(endStr);
 
-        function toggleSettingsModal(show) {
-            document.getElementById('settings-modal').classList.toggle('hidden', !show);
-            if (show) document.getElementById('set-table').value = settings.table;
-        }
+                if (endMin <= startMin) { endMin += 24 * 60; }
 
-        function updateTempSettings(key, val) {
-            tempSettings[key] = val;
-            const isIn = tempSettings.type === '內用';
-            document.getElementById('set-in').className = isIn ? "flex-1 py-3.5 rounded-xl text-base font-bold bg-white shadow-sm text-orange-600" : "flex-1 py-3.5 rounded-xl text-base font-bold text-gray-400";
-            document.getElementById('set-out').className = !isIn ? "flex-1 py-3.5 rounded-xl text-base font-bold bg-white shadow-sm text-orange-600" : "flex-1 py-3.5 rounded-xl text-base font-bold text-gray-400";
-        }
+                let breaks = [];
+                if (empId === "13056") {
+                    if (dayType === "平日") {
+                        breaks = [{ s: 12 * 60, e: 13 * 60 }, { s: 15 * 60, e: 15 * 60 + 30 }];
+                    } else {
+                        breaks = [{ s: 7 * 60 + 30, e: 8 * 60 }, { s: 12 * 60, e: 13 * 60 }, { s: 17 * 60, e: 17 * 60 + 30 }];
+                    }
+                } else {
+                    breaks = [{ s: 12 * 60, e: 13 * 60 }, { s: 17 * 60, e: 17 * 60 + 30 }];
+                }
 
-        function saveSettings() {
-            settings = { ...tempSettings, table: document.getElementById('set-table').value };
-            document.getElementById('order-type-display').innerText = settings.type;
-            document.getElementById('table-display').innerText = settings.table ? `桌號: ${settings.table}` : '未填桌號';
-            document.getElementById('modal-info-text').innerText = `${settings.type} / ${settings.table ? '桌號:' + settings.table : '未填桌號'}`;
-            toggleSettingsModal(false);
-        }
+                let deduction = 0;
+                breaks.forEach(b => {
+                    deduction += Math.max(0, Math.min(endMin, b.e) - Math.max(startMin, b.s));
+                    deduction += Math.max(0, Math.min(endMin, b.e + 1440) - Math.max(startMin, b.s + 1440));
+                });
 
-        function toggleCartModal(show) {
-            if (show && cart.length === 0) { showToast('購物車內目前空空的喔！'); return; }
-            document.getElementById('cart-modal').classList.toggle('hidden', !show);
-            if (show) {
-                // 打開購物車時，清除 Drawer 的狀態快取，避免 changeQty 抓錯 mainId
-                document.getElementById('drawer-title').dataset.currentId = "";
-                renderCartItems();
+                const validMins = (endMin - startMin) - deduction;
+                totalInput.value = (validMins / 60).toFixed(1);
+            } else {
+                totalInput.value = "";
             }
-        }
+            window.autoSyncRecords();
+        };
 
-        // 修改點：抽離出購物車清單渲染邏輯，方便即時更新
-        function renderCartItems() {
-            const list = document.getElementById('cart-items-list');
-            if (cart.length === 0) {
-                list.innerHTML = `<div class="text-center py-10"><p class="text-gray-400 font-bold">訂單是空的</p></div>`;
-                return;
+        window.handleTranslation = async function(input) {
+            const originalText = input.value.trim();
+            if (!originalText || !/[\u0E00-\u0E7F]/.test(originalText) || originalText.includes('(')) return;
+
+            input.classList.add('translating');
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(originalText)}`);
+                const data = await res.json();
+                input.classList.remove('translating');
+
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    const translatedText = data[0][0][0];
+                    input.value = `${originalText} (${translatedText})`;
+                    window.autoSyncRecords();
+                }
+            } catch (err) {
+                input.classList.remove('translating');
+                console.error("翻譯失敗", err);
             }
-            list.innerHTML = cart.map(i => `
-                <div class="flex flex-col bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1 pr-4">
-                            <p class="font-bold text-gray-800 text-base leading-tight">${i.name}</p>
-                            <p class="text-xs font-bold text-gray-400 mt-1">$${i.price} / 份</p>
+        };
+
+        window.renderTable = function(rowsData = []) {
+            const tbody = document.getElementById('ot-tbody');
+            tbody.innerHTML = '';
+
+            for (let i = 0; i < 10; i++) {
+                const d = rowsData[i] || {};
+                const empOps = Object.keys(empMap).map(id => `<option value="${id}" ${d.id === id ? 'selected' : ''}>${id}</option>`).join('');
+                const timeOpsStart = window.generateTimeOptions(d.start || '');
+                const timeOpsEnd = window.generateTimeOptions(d.end || '');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><select class="emp-id" onchange="handleRowEmpChange(this)"><option value="">選擇</option>${empOps}</select></td>
+                    <td class="bg-gray-50"><input type="text" class="emp-name" readonly placeholder="-" value="${empMap[d.id] || ''}"></td>
+                    <td class="px-1 relative">
+                        <div class="day-container flex flex-col items-center justify-center h-full gap-0">
+                            <input type="date" class="ot-day h-7" onchange="handleDateChange(this)" value="${d.dateVal || ''}" ${d.dateDisp ? `data-display="${d.dateDisp}"` : ''}>
+                            <div class="w-full day-type-wrapper">
+                                <select class="day-type-select type-select hidden" onchange="calculateRowHours(this)">
+                                    <option value="平日" ${d.type === '平日' ? 'selected' : ''}>平日วันธรรมดา</option>
+                                    <option value="假日" ${d.type === '假日' ? 'selected' : ''}>假日วันหยุด</option>
+                                </select>
+                                <div class="export-text-overlay"></div>
+                            </div>
                         </div>
-                        <p class="font-black text-orange-600 text-lg">NT$ <span id="cart-subtotal-${i.key}">${(i.price * i.qty).toLocaleString()}</span></p>
-                    </div>
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-50">
-                        <span class="text-xs font-bold text-gray-300">修改數量</span>
-                        <div class="flex items-center space-x-6 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl">
-                            <button onclick="changeQty('${i.key}', '${i.name}', ${i.price}, -1)" class="w-8 h-8 flex items-center justify-center text-xl font-black text-gray-400 active:scale-90">-</button>
-                            <span id="cart-qty-${i.key}" class="text-lg font-black w-6 text-center text-gray-800">${i.qty}</span>
-                            <button onclick="changeQty('${i.key}', '${i.name}', ${i.price}, 1)" class="w-8 h-8 flex items-center justify-center text-xl font-black text-orange-600 active:scale-90">+</button>
-                        </div>
-                    </div>
-                </div>`).join('');
-        }
+                    </td>
+                    <td class="w-24"><select class="start-time font-mono" onchange="calculateRowHours(this)"><option value="">開始</option>${timeOpsStart}</select></td>
+                    <td class="w-24"><select class="end-time font-mono" onchange="calculateRowHours(this)"><option value="">結束</option>${timeOpsEnd}</select></td>
+                    <td class="bg-blue-50"><input type="number" class="total-hours font-bold text-blue-700" readonly value="${d.hours || ''}"></td>
+                    <td><select class="job-desc" onchange="autoSyncRecords()"><option value="">選擇</option>${jobOptions.map(opt => `<option value="${opt}" ${d.job === opt ? 'selected' : ''}>${opt}</option>`).join('')}</select></td>
+                    <td><input type="text" class="remarks" onblur="handleTranslation(this)" placeholder="泰文自動翻譯" value="${d.rem || ''}"></td>
+                `;
+                tbody.appendChild(tr);
 
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.className = "fixed top-[100px] left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur text-white px-8 py-4 rounded-full text-base font-bold z-[200]";
-            t.innerText = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 2000);
-        }
-
-        function submitOrder() {
-            if (settings.type === '內用' && !settings.table) { 
-                showToast('內用請先輸入桌號喔！'); 
-                toggleCartModal(false); toggleSettingsModal(true); return; 
+                // 觸發初始樣式
+                if (d.id) {
+                    const sel = tr.querySelector('.emp-id');
+                    window.handleRowEmpChange(sel);
+                }
             }
-            document.body.innerHTML += `<div class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center p-8 drawer-animate-in">
-                <div class="w-28 h-28 bg-green-500 text-white rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-green-200"><svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg></div>
-                <h2 class="text-4xl font-black text-gray-800 mb-4">訂單已送出</h2>
-                <button onclick="location.reload()" class="w-full max-w-xs bg-gray-900 text-white py-5 rounded-2xl font-black text-xl">返回首頁</button>
-            </div>`;
-        }
+        };
 
-        function scrollToCategory(id, btnElement) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            window.scrollTo({ top: el.offsetTop - 150, behavior: 'smooth' });
-            document.querySelectorAll('.category-tab').forEach(btn => btn.classList.remove('active'));
-            if (btnElement) btnElement.classList.add('active');
-        }
+        // Firebase 自動存檔
+        let saveTimeout;
+        window.autoSyncRecords = function() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                const records = [];
+                document.querySelectorAll('#ot-tbody tr').forEach(tr => {
+                    records.push({
+                        id: tr.querySelector('.emp-id').value,
+                        dateVal: tr.querySelector('.ot-day').value,
+                        dateDisp: tr.querySelector('.ot-day').getAttribute('data-display') || '',
+                        type: tr.querySelector('.day-type-select').value,
+                        start: tr.querySelector('.start-time').value,
+                        end: tr.querySelector('.end-time').value,
+                        hours: tr.querySelector('.total-hours').value,
+                        job: tr.querySelector('.job-desc').value,
+                        rem: tr.querySelector('.remarks').value
+                    });
+                });
+
+                const dataToSave = {
+                    doc_date: document.getElementById('doc_date').value,
+                    rows: records
+                };
+
+                try {
+                    await setDoc(docRef, dataToSave);
+                } catch (err) {
+                    console.error("Firebase Sync Error", err);
+                }
+            }, 800); // 停止輸入後0.8秒儲存
+        };
+
+        // Firebase 自動讀取
+        window.loadSavedRecords = async function() {
+            try {
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.doc_date) document.getElementById('doc_date').value = data.doc_date;
+                    window.renderTable(data.rows || []);
+                } else {
+                    window.renderTable([]);
+                }
+            } catch (err) {
+                console.error("Firebase Load Error", err);
+                window.renderTable([]);
+            }
+        };
+
+        // 一鍵清空 (包含清空 Firebase 雲端)
+        window.clearAllData = async function() {
+            if (confirm("確定要清空所有資料嗎？(ล้างข้อมูลทั้งหมด?)\n此操作將同步清空雲端資料。")) {
+                document.getElementById('doc_date').value = "";
+                window.renderTable([]);
+                try {
+                    await setDoc(docRef, { doc_date: "", rows: [] });
+                } catch (err) {
+                    console.error("Firebase Clear Error", err);
+                }
+            }
+        };
+
+        // 圖片匯出優化 (保持原功能)
+        window.exportToImage = async function() {
+            const element = document.getElementById('ot-form');
+            const rows = document.querySelectorAll('#ot-tbody tr');
+            
+            rows.forEach(row => {
+                const dayInput = row.querySelector('.ot-day');
+                const select = row.querySelector('.day-type-select');
+                const overlay = row.querySelector('.export-text-overlay');
+                
+                if (!select.classList.contains('hidden')) {
+                    overlay.innerText = select.options[select.selectedIndex].text;
+                    overlay.style.display = 'block';
+                    select.style.visibility = 'hidden';
+                }
+
+                if (dayInput.value) {
+                    const disp = dayInput.getAttribute('data-display');
+                    const textNode = document.createElement('div');
+                    textNode.className = 'temp-date-text';
+                    textNode.innerText = disp;
+                    textNode.style.position = 'absolute';
+                    textNode.style.top = '10px';
+                    textNode.style.width = '100%';
+                    textNode.style.fontSize = '13px';
+                    textNode.style.zIndex = '10';
+                    dayInput.parentNode.appendChild(textNode);
+                    dayInput.style.visibility = 'hidden';
+                }
+            });
+
+            const canvas = await html2canvas(element, { 
+                scale: 2, 
+                useCORS: true,
+                backgroundColor: "#ffffff" 
+            });
+
+            rows.forEach(row => {
+                row.querySelector('.day-type-select').style.visibility = 'visible';
+                row.querySelector('.export-text-overlay').style.display = 'none';
+                
+                const temp = row.querySelector('.temp-date-text');
+                if(temp) temp.remove();
+                row.querySelector('.ot-day').style.visibility = 'visible';
+            });
+
+            const link = document.createElement('a');
+            link.download = `加班單_${document.getElementById('doc_date').value || 'New'}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        };
+
+        // Excel 匯出 (保持原功能)
+        window.exportToExcel = function() {
+            const dataRows = [];
+            document.querySelectorAll('#ot-tbody tr').forEach(row => {
+                const id = row.querySelector('.emp-id').value;
+                if (id) {
+                    const dayInput = row.querySelector('.ot-day');
+                    const dayVal = dayInput.getAttribute('data-display') || dayInput.value;
+                    const dayType = row.querySelector('.day-type-select').value;
+                    const displayDay = id === "13056" ? `${dayVal} (${dayType})` : dayVal;
+
+                    dataRows.push([
+                        id,
+                        row.querySelector('.emp-name').value,
+                        displayDay,
+                        row.querySelector('.start-time').value,
+                        row.querySelector('.end-time').value,
+                        row.querySelector('.total-hours').value,
+                        row.querySelector('.job-desc').value,
+                        row.querySelector('.remarks').value
+                    ]);
+                }
+            });
+
+            const tableData = [
+                ["大量科技股份有限公司"],
+                ["加班申請單 (แบบฟอร์มขอทำงานล่วงเวลา)"],
+                [`日期: ${document.getElementById('doc_date').value}`, "", "", "", "", "", "單位：管理部"],
+                ["工號", "姓名", "月/日", "開始時間", "結束時間", "加班時數", "工作內容", "備註"],
+                ...dataRows
+            ];
+            
+            const worksheet = XLSX.utils.aoa_to_sheet(tableData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Overtime");
+            XLSX.writeFile(workbook, `多人加班單_${document.getElementById('doc_date').value}.xlsx`);
+        };
+
+        // 載入時執行
+        window.onload = function() {
+            window.loadSavedRecords();
+        };
     </script>
 </body>
 </html>
