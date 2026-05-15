@@ -3,32 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加班申請單 - 雲端同步增強版</title>
+    <title>加班申請單 - Overtime Request Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans TC', 'Noto Sans Thai', sans-serif; background-color: #f3f4f6; }
-        .form-container { background-color: white; padding: 30px; width: 1100px; margin-left: auto; margin-right: auto; position: relative; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th, td { border: 1px solid #000; padding: 4px; text-align: center; vertical-align: middle; height: 60px; overflow: visible; }
-        select, input { width: 100%; height: 100%; border: none; outline: none; background: transparent; text-align: center; text-align-last: center; appearance: none; -webkit-appearance: none; cursor: pointer; padding: 0; margin: 0; display: block; line-height: 1.2; font-size: 13px; }
-        input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; left: 0; top: 0; width: 100%; height: 100%; margin: 0; padding: 0; cursor: pointer; opacity: 0; }
-        .filter-input { border: 1px solid #e2e8f0 !important; background-color: white !important; border-radius: 6px; height: 32px !important; width: 150px !important; padding: 0 8px !important; font-size: 12px; position: relative; }
-        .type-select { font-size: 10px; background-color: #fffbeb; border: 1px solid #fcd34d !important; border-radius: 4px; height: 20px !important; margin-top: -4px; padding: 0 1px; font-weight: bold; color: #92400e; }
-        .tab-btn { padding: 12px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: bold; color: #6b7280; background-color: #f9fafb; }
-        .tab-btn.active { border-bottom: 3px solid #2563eb; color: #2563eb; background-color: white; }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Noto Sans Thai', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            width: 1100px; 
+            margin-left: auto;
+            margin-right: auto;
+            position: relative; /* 第一版保留：為 sync-indicator 提供定位基準 */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+            vertical-align: middle;
+            height: 60px;
+            overflow: visible;
+        }
+
+        select, input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            text-align: center;
+            text-align-last: center;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            display: block;
+            line-height: 1.2;
+            font-size: 13px;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .filter-input {
+            border: 1px solid #e2e8f0 !important;
+            background-color: white !important;
+            border-radius: 6px;
+            height: 32px !important;
+            width: 150px !important;
+            padding: 0 8px !important;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .type-select {
+            font-size: 10px;
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d !important;
+            border-radius: 4px;
+            height: 20px !important;
+            margin-top: -4px; 
+            padding: 0 1px;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: #6b7280;
+            background-color: #f9fafb;
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            background-color: white;
+        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
         .record-table th { background-color: #f8fafc; font-size: 11px; height: 40px; }
         .record-table td { font-size: 12px; height: 45px; border: 1px solid #e2e8f0; }
+
         .translating { background-color: #f0f9ff !important; color: #0369a1; font-style: italic; }
-        #confirm-modal, #edit-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 12px 24px; border-radius: 9999px; display: none; z-index: 3000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-weight: bold; }
-        .sync-indicator { position: absolute; top: 10px; right: 10px; font-size: 12px; font-weight: bold; }
-        .export-text-overlay { display: none; font-size: 10px; font-weight: bold; color: #b45309; background-color: #fffbeb; border: 1px solid #fcd34d; border-radius: 4px; width: 100%; padding: 1px 0; margin-top: -4px; }
-        @media print { .no-print-area { display: none; } body { background-color: white; padding: 0; } .form-container { box-shadow: none; margin: 0; width: 100%; } }
+
+        #confirm-modal, #edit-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            display: none;
+            z-index: 3000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+
+        .export-text-overlay {
+            display: none;
+            font-size: 10px; font-weight: bold; color: #b45309; background-color: #fffbeb;
+            border: 1px solid #fcd34d; border-radius: 4px; width: 100%; padding: 1px 0;
+            margin-top: -4px;
+        }
+
+        /* 第一版保留：即時同步狀態 UI */
+        .sync-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @media print {
+            .no-print-area { display: none; }
+            body { background-color: white; padding: 0; }
+            .form-container { box-shadow: none; margin: 0; width: 100%; }
+        }
     </style>
 </head>
 <body class="p-4">
@@ -98,14 +230,22 @@
 
         <div id="form-page" class="tab-content active">
             <div class="mb-6 flex flex-wrap gap-4 no-print-area bg-white p-4 rounded-b-lg shadow-md border-t border-gray-100 items-center">
-                <button onclick="exportToImage()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">匯出圖片 (Export Image)</button>
-                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">匯出主表 Excel (Export XLSX)</button>
-                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">列印 (Print)</button>
-                <button onclick="confirmClearForm()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">一鍵清空 (ล้างข้อมูล)</button>
-                
+                <button onclick="exportToImage()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
+                    匯出圖片 (Export Image)
+                </button>
+                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
+                    匯出主表 Excel (Export XLSX)
+                </button>
+                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
+                    列印 (Print)
+                </button>
+                <button onclick="confirmClearForm()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 ml-auto text-sm font-bold active:scale-95">
+                    一鍵清空目前表單 (ล้างข้อมูลหน้าหลัก)
+                </button>
+
                 <div id="save-loader" class="flex items-center text-gray-500 text-sm italic ml-4 opacity-0 transition-opacity">
                     <svg class="animate-spin h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    雲端同步中...
+                    同步中...
                 </div>
             </div>
 
@@ -116,28 +256,22 @@
                     <h2 class="text-2xl font-bold text-gray-800">大量科技股份有限公司</h2>
                     <h1 class="text-xl font-bold text-gray-700">加班申請單 (แบบฟอร์มขอทำงานล่วงเวลา)</h1>
                 </div>
-
-                <div class="flex justify-between mb-4 px-2">
-                    <div class="flex items-center">
-                        <span class="font-bold mr-2 text-sm">日期 (วันที่):</span>
-                        <input type="date" id="doc_date" class="border-b border-black w-40 text-left px-2 h-auto" onchange="triggerAutoSave()">
-                    </div>
-                    <div><span class="font-bold text-gray-800 underline text-sm">單位：管理部 (Unit: HR Department)</span></div>
+                <div class="flex justify-end mb-4 px-2">
+                    <span class="font-bold text-gray-800 underline text-sm">單位：管理部 (Unit: HR Department)</span>
                 </div>
-
                 <table>
                     <thead class="bg-gray-100 text-[12px]">
                         <tr>
                             <th class="w-20 font-bold">工號<br><span class="text-[9px] text-gray-500 font-normal">รหัสพนักงาน</span></th>
                             <th class="w-24 font-bold">姓名<br><span class="text-[9px] text-gray-500 font-normal">ชื่อ</span></th>
                             <th class="w-28 font-bold">月/日<br><span class="text-[9px] text-gray-500 font-normal">เดือน/วัน</span></th>
-                            <th class="w-48 font-bold" colspan="2">開始/結束時間 (24H)<br><span class="text-[9px] text-gray-500 font-normal">時間範圍</span></th>
+                            <th class="w-48 font-bold" colspan="2">開始/結束時間 (24H)<br><span class="text-[9px] text-gray-500 font-normal">เวลาเริ่มต้น - สิ้นสุด</span></th>
                             <th class="w-16 font-bold">時數<br><span class="text-[9px] text-gray-500 font-normal">ชม.</span></th>
                             <th class="w-40 font-bold">工作內容<br><span class="text-[9px] text-gray-500 font-normal">ทำงานอะไร</span></th>
                             <th class="font-bold">備註 (支援泰文自動翻譯)<br><span class="text-[9px] text-gray-500 font-normal">หมายเหตุ (แปลอัตโนมัติ)</span></th>
                         </tr>
                     </thead>
-                    <tbody id="ot-tbody" oninput="triggerAutoSave()"></tbody>
+                    <tbody id="ot-tbody"></tbody>
                 </table>
                 <div class="mt-8 flex justify-between items-end px-2">
                     <div class="text-[11px] text-blue-700 font-bold">
@@ -145,7 +279,7 @@
                         * 其他工號扣除邏輯：(12-13, 17-17:30)
                     </div>
                     <div class="text-[10px] text-gray-400 text-right italic">
-                        最後同步: <span id="gen-time">-</span>
+                        Generated on: <span id="gen-time"></span>
                     </div>
                 </div>
             </div>
@@ -155,25 +289,35 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-blue-800">阿凱 Krai (13031) 加班記錄頁面</h2>
                 <div class="flex gap-2">
-                    <button onclick="exportHistoryToExcel('13031')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold transition">匯出此表 Excel</button>
-                    <button onclick="clearSpecificRecords('13031')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200 hover:bg-red-100 font-bold transition">清空所有紀錄</button>
+                    <button onclick="exportHistoryToExcel('13031')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold active:scale-95 transition flex items-center gap-1">
+                        匯出此表 Excel
+                    </button>
+                    <button onclick="clearSpecificRecords('13031')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200 hover:bg-red-100 font-bold active:scale-95 transition">清空所有紀錄</button>
                 </div>
             </div>
+
             <div class="bg-gray-50 p-4 rounded-lg mb-6 flex flex-wrap items-center gap-4 text-sm border border-gray-100">
                 <div class="flex items-center gap-2">
-                    <span class="font-bold text-gray-600">日期篩選:</span>
+                    <span class="font-bold text-gray-600">日期篩選 (Filter Date):</span>
                     <input type="date" id="krai-filter-start" class="filter-input" onchange="renderSavedRecords()">
-                    <span class="text-gray-400">至</span>
+                    <span class="text-gray-400">至 (To)</span>
                     <input type="date" id="krai-filter-end" class="filter-input" onchange="renderSavedRecords()">
                 </div>
-                <button onclick="clearFilter('13031')" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-xs font-bold transition">清除篩選</button>
+                <button onclick="clearFilter('13031')" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-xs font-bold transition">清除篩選 (Reset)</button>
                 <div class="ml-auto bg-blue-100 text-blue-700 px-4 py-2 rounded-lg border border-blue-200 flex items-center gap-2">
-                    <span class="font-bold">目前篩選總計:</span> <span id="krai-total-display" class="text-lg font-black">0.0</span> <span class="font-bold text-xs">小時</span>
+                    <span class="font-bold">目前篩選總計:</span>
+                    <span id="krai-total-display" class="text-lg font-black">0.0</span>
+                    <span class="font-bold text-xs">小時 (Hrs)</span>
                 </div>
             </div>
+
             <div class="overflow-x-auto">
                 <table class="record-table w-full">
-                    <thead><tr class="bg-gray-50"><th>年/月/日</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th></tr></thead>
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th>年/月/日</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th>
+                        </tr>
+                    </thead>
                     <tbody id="krai-records-body"></tbody>
                 </table>
             </div>
@@ -183,25 +327,35 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-amber-700">娜萌 Mon (13056) 加班記錄頁面</h2>
                 <div class="flex gap-2">
-                    <button onclick="exportHistoryToExcel('13056')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold transition">匯出此表 Excel</button>
-                    <button onclick="clearSpecificRecords('13056')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200 hover:bg-red-100 font-bold transition">清空所有紀錄</button>
+                    <button onclick="exportHistoryToExcel('13056')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold active:scale-95 transition flex items-center gap-1">
+                        匯出此表 Excel
+                    </button>
+                    <button onclick="clearSpecificRecords('13056')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200 hover:bg-red-100 font-bold active:scale-95 transition">清空所有紀錄</button>
                 </div>
             </div>
+
             <div class="bg-gray-50 p-4 rounded-lg mb-6 flex flex-wrap items-center gap-4 text-sm border border-gray-100">
                 <div class="flex items-center gap-2">
-                    <span class="font-bold text-gray-600">日期篩選:</span>
+                    <span class="font-bold text-gray-600">日期篩選 (Filter Date):</span>
                     <input type="date" id="mon-filter-start" class="filter-input" onchange="renderSavedRecords()">
-                    <span class="text-gray-400">至</span>
+                    <span class="text-gray-400">至 (To)</span>
                     <input type="date" id="mon-filter-end" class="filter-input" onchange="renderSavedRecords()">
                 </div>
-                <button onclick="clearFilter('13056')" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-xs font-bold transition">清除篩選</button>
+                <button onclick="clearFilter('13056')" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-xs font-bold transition">清除篩選 (Reset)</button>
                 <div class="ml-auto bg-amber-100 text-amber-700 px-4 py-2 rounded-lg border border-amber-200 flex items-center gap-2">
-                    <span class="font-bold">目前篩選總計:</span> <span id="mon-total-display" class="text-lg font-black">0.0</span> <span class="font-bold text-xs">小時</span>
+                    <span class="font-bold">目前篩選總計:</span>
+                    <span id="mon-total-display" class="text-lg font-black">0.0</span>
+                    <span class="font-bold text-xs">小時 (Hrs)</span>
                 </div>
             </div>
+
             <div class="overflow-x-auto">
                 <table class="record-table w-full">
-                    <thead><tr class="bg-gray-50"><th>年/月/日</th><th>類型</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th></tr></thead>
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th>年/月/日</th><th>類型</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th>
+                        </tr>
+                    </thead>
                     <tbody id="mon-records-body"></tbody>
                 </table>
             </div>
@@ -209,86 +363,499 @@
     </div>
 
     <script>
-        // --- 核心邏輯 (來自第二版，保留所有計算、翻譯、Tab切換) ---
+        document.getElementById('gen-time').innerText = new Date().toLocaleString();
         let currentSessionId = Date.now();
         let confirmCallback = null;
         const empMap = { "13031": "阿凱Krai", "13056": "娜萌Mon" };
         const jobOptions = ["管理部/แผนกบริหาร", "支援資材部/แผนกวัสดุ", "支援生產部/แผนกผลิต"];
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function openConfirmModal(title, msg, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = msg;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').style.display = 'flex';
+            document.getElementById('confirm-execute-btn').onclick = function() {
+                if(confirmCallback) confirmCallback();
+                closeConfirmModal();
+            };
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            confirmCallback = null;
+        }
+
+        function containsThai(text) { return /[\u0E00-\u0E7F]/.test(text); }
+
+        async function translateText(text) {
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data[0]) {
+                    let fullTranslation = "";
+                    data[0].forEach(part => { if (part[0]) fullTranslation += part[0]; });
+                    return fullTranslation.trim();
+                }
+                return "";
+            } catch (error) { return ""; }
+        }
+
+        async function handleTranslation(input) {
+            const originalText = input.value.trim();
+            if (!originalText || !containsThai(originalText) || originalText.includes('(')) return;
+            input.classList.add('translating');
+            const placeholder = originalText + " (正在翻譯中...)";
+            input.value = placeholder;
+            const translated = await translateText(originalText);
+            input.classList.remove('translating');
+            input.value = (translated && translated !== originalText) ? `${originalText} (${translated})` : originalText;
+            autoSyncRecords(); 
+        }
+
+        function renderSavedRecords() {
+            const storageKey = 'ot_permanent_database';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const kraiBody = document.getElementById('krai-records-body');
+            const monBody = document.getElementById('mon-records-body');
+      
+            let kraiTotalHours = 0;
+            let monTotalHours = 0;
+
+            const kStart = document.getElementById('krai-filter-start').value;
+            const kEnd = document.getElementById('krai-filter-end').value;
+            const mStart = document.getElementById('mon-filter-start').value;
+            const mEnd = document.getElementById('mon-filter-end').value;
+
+            kraiBody.innerHTML = '';
+            monBody.innerHTML = '';
+            history.forEach(rec => {
+                const recDate = rec.dayVal.replace(/\//g, '-'); 
+                let show = true;
+
+                if (rec.empId === "13031") {
+                    if (kStart && recDate < kStart) show = false;
+                    if (kEnd && recDate > kEnd) show = false;
+                    
+                    if (show) {
+                        kraiTotalHours += parseFloat(rec.hours || 0);
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${rec.dayVal}</td><td>${rec.timeRange}</td><td class="font-bold text-blue-600">${rec.hours}</td><td>${rec.job}</td><td class="text-left px-2 text-[11px]">${rec.remarks}</td><td><div class="flex gap-2 justify-center"><button onclick="openEditModal('${rec.recordId}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 text-[11px] font-bold transition active:scale-95">編輯</button><button onclick="deleteSingleRecord('${rec.recordId}')" class="text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200 hover:bg-red-100 text-[11px] font-bold transition active:scale-95">刪除</button></div></td>`;
+                        kraiBody.appendChild(tr);
+                    }
+                } else if (rec.empId === "13056") {
+                    if (mStart && recDate < mStart) show = false;
+                    if (mEnd && recDate > mEnd) show = false;
+
+                    if (show) {
+                        monTotalHours += parseFloat(rec.hours || 0);
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${rec.dayVal}</td><td class="text-orange-600 font-bold">${rec.dayType}</td><td>${rec.timeRange}</td><td class="font-bold text-blue-600">${rec.hours}</td><td>${rec.job}</td><td class="text-left px-2 text-[11px]">${rec.remarks}</td><td><div class="flex gap-2 justify-center"><button onclick="openEditModal('${rec.recordId}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 text-[11px] font-bold transition active:scale-95">編輯</button><button onclick="deleteSingleRecord('${rec.recordId}')" class="text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200 hover:bg-red-100 text-[11px] font-bold transition active:scale-95">刪除</button></div></td>`;
+                        monBody.appendChild(tr);
+                    }
+                }
+            });
+            document.getElementById('krai-total-display').innerText = kraiTotalHours.toFixed(1);
+            document.getElementById('mon-total-display').innerText = monTotalHours.toFixed(1);
+        }
+
+        function clearFilter(empId) {
+            if (empId === "13031") {
+                document.getElementById('krai-filter-start').value = "";
+                document.getElementById('krai-filter-end').value = "";
+            } else {
+                document.getElementById('mon-filter-start').value = "";
+                document.getElementById('mon-filter-end').value = "";
+            }
+            renderSavedRecords();
+        }
+
+        function autoSyncRecords() {
+            const rows = document.querySelectorAll('#ot-tbody tr');
+            const storageKey = 'ot_permanent_database';
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            rows.forEach((row, index) => {
+                const id = row.querySelector('.emp-id').value;
+                const dayInput = row.querySelector('.ot-day');
+                const dayVal = dayInput.getAttribute('data-display') || dayInput.value || "";
+                const startTime = row.querySelector('.start-time').value;
+                const endTime = row.querySelector('.end-time').value;
+                const hours = row.querySelector('.total-hours').value;
+                const job = row.querySelector('.job-desc').value;
+                const remarks = row.querySelector('.remarks').value;
+                const dayType = row.querySelector('.day-type-select').value;
+
+                const recordId = `SID-${currentSessionId}-ROW-${index}`;
+                const recordIndex = history.findIndex(rec => rec.recordId === recordId);
+
+                if (id && dayVal && startTime && endTime && parseFloat(hours) > 0) {
+                    const updatedRecord = {
+                        recordId: recordId,
+                        saveDate: new Date().toLocaleDateString(),
+                        empId: id,
+                        dayVal: dayVal,
+                        dayType: dayType,
+                        timeRange: `${startTime} - ${endTime}`,
+                        hours: hours,
+                        job: job,
+                        remarks: remarks
+                    };
+                    if (recordIndex > -1) history[recordIndex] = updatedRecord;
+                    else history.push(updatedRecord);
+                } else if (recordIndex > -1) {
+                    history.splice(recordIndex, 1);
+                }
+            });
+
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            renderSavedRecords();
+
+            // 第一版整合：每次表單變更時，除了歷史紀錄，也同時觸發「即時表單狀態」雲端保存
+            if(window.triggerAutoSave) window.triggerAutoSave();
+        }
+
+        function deleteSingleRecord(recordId) {
+            openConfirmModal(
+                '確定刪除紀錄？',
+                '此操作將從歷史資料庫中移除該筆紀錄 (ลบข้อมูลนี้ใช่หรือไม่)',
+                function() {
+                    const storageKey = 'ot_permanent_database';
+                    let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    history = history.filter(rec => rec.recordId !== recordId);
+                    localStorage.setItem(storageKey, JSON.stringify(history));
+                    renderSavedRecords();
+                    showToast('紀錄已成功刪除');
+                }
+            );
+        }
+
+        function clearSpecificRecords(empId) {
+            const name = empMap[empId] || empId;
+            openConfirmModal(
+                `確定清空 ${name} 的所有紀錄？`,
+                '這將永久移除該名員工所有的歷史紀錄，且無法恢復。',
+                function() {
+                    const storageKey = 'ot_permanent_database';
+                    let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    history = history.filter(rec => rec.empId !== empId);
+                    localStorage.setItem(storageKey, JSON.stringify(history));
+                    renderSavedRecords();
+                    showToast(`${name} 的紀錄已全部清空`);
+                }
+            );
+        }
+
+        function openEditModal(recordId) {
+            const storageKey = 'ot_permanent_database';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const rec = history.find(r => r.recordId === recordId);
+            if (!rec) return;
+
+            document.getElementById('edit-record-id').value = recordId;
+            document.getElementById('edit-day').value = rec.dayVal;
+            document.getElementById('edit-type').value = rec.dayType;
+            document.getElementById('edit-range').value = rec.timeRange;
+            document.getElementById('edit-hours').value = rec.hours;
+            document.getElementById('edit-job').value = rec.job;
+            document.getElementById('edit-remarks').value = rec.remarks;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+        function saveEditRecord() {
+            const recordId = document.getElementById('edit-record-id').value;
+            const storageKey = 'ot_permanent_database';
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const index = history.findIndex(r => r.recordId === recordId);
+            if (index > -1) {
+                history[index].dayVal = document.getElementById('edit-day').value;
+                history[index].dayType = document.getElementById('edit-type').value;
+                history[index].timeRange = document.getElementById('edit-range').value;
+                history[index].hours = document.getElementById('edit-hours').value;
+                history[index].job = document.getElementById('edit-job').value;
+                history[index].remarks = document.getElementById('edit-remarks').value;
+
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                closeEditModal();
+                renderSavedRecords();
+                showToast('變更已儲存');
+            }
+        }
+
+        function confirmClearForm() {
+            openConfirmModal(
+                '確定要清空表單？',
+                '此操作將清空目前畫面上的所有輸入內容 (ล้างข้อมูลหน้าหลัก)',
+                function() {
+                    currentSessionId = Date.now();
+                    const rows = document.querySelectorAll('#ot-tbody tr');
+                    rows.forEach(row => {
+                        row.querySelector('.emp-id').value = "";
+                        row.querySelector('.emp-name').value = "";
+                        const otDayInput = row.querySelector('.ot-day');
+                        otDayInput.value = "";
+                        otDayInput.removeAttribute('data-display');
+                        otDayInput.style.color = "transparent";
+                        row.querySelector('.start-time').value = "";
+                        row.querySelector('.end-time').value = "";
+                        row.querySelector('.total-hours').value = "";
+                        row.querySelector('.job-desc').value = "";
+                        row.querySelector('.remarks').value = "";
+                    });
+                    showToast('表單已重設');
+                    renderSavedRecords();
+                    
+                    // 第一版整合：清空畫面時，一併同步清除雲端即時表單狀態
+                    if(window.triggerAutoSave) window.triggerAutoSave();
+                }
+            );
+        }
+
+        function handleDateChange(input) {
+            if (!input.value) return;
+            const dateObj = new Date(input.value);
+            const yyyy = dateObj.getFullYear();
+            const mm = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            const dd = dateObj.getDate().toString().padStart(2, '0');
+            input.setAttribute('data-display', `${yyyy}/${mm}/${dd}`);
+            input.style.color = "black";
+            autoSyncRecords();
+        }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
-            if (tabId !== 'form-page') renderSavedRecords();
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg; toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        function generateTimeOptions() {
+            let options = '';
+            for (let h = 0; h < 24; h++) {
+                for (let m = 0; m < 60; m += 30) {
+                    const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    options += `<option value="${time}">${time}</option>`;
+                }
+            }
+            return options;
         }
 
-        // ... (省略中間重複的 V2 UI 邏輯如 openConfirmModal, containsThai, translateText 等，請確保保留原代碼) ...
-        // 以下為關鍵整合函數
+        function handleRowEmpChange(selectElement) {
+            const row = selectElement.closest('tr');
+            const empId = selectElement.value;
+            row.querySelector('.emp-name').value = empMap[empId] || "";
+            const dayTypeSelect = row.querySelector('.day-type-select');
+            if (empId === "13056") dayTypeSelect.classList.remove('hidden');
+            else { dayTypeSelect.classList.add('hidden'); dayTypeSelect.value = "平日"; }
+            calculateRowHours(row.querySelector('.start-time'));
+            autoSyncRecords();
+        }
 
-        window.renderTable = (data = []) => {
+        function calculateRowHours(element) {
+            const row = element.closest('tr');
+            const empId = row.querySelector('.emp-id').value;
+            const startStr = row.querySelector('.start-time').value;
+            const endStr = row.querySelector('.end-time').value;
+            const totalInput = row.querySelector('.total-hours');
+            const dayType = row.querySelector('.day-type-select').value;
+            if (startStr && endStr) {
+                const toMin = (t) => {
+                    const [h, m] = t.split(':').map(Number);
+                    return h * 60 + m;
+                };
+                let startMin = toMin(startStr);
+                let endMin = toMin(endStr);
+                if (endMin <= startMin) endMin += 1440;
+                let totalMin = endMin - startMin;
+                let breaks = (empId === "13056") ?
+                    (dayType === "平日" ? [{start: 720, end: 780}, {start: 900, end: 930}] : [{start: 450, end: 480}, {start: 720, end: 780}, {start: 1020, end: 1050}]) :
+                    [{start: 720, end: 780}, {start: 1020, end: 1050}];
+                let deductionMin = 0;
+                breaks.forEach(b => {
+                    const overlapStart = Math.max(startMin, b.start);
+                    const overlapEnd = Math.min(endMin, b.end);
+                    if (overlapEnd > overlapStart) deductionMin += (overlapEnd - overlapStart);
+                  
+                    const overlapStartNext = Math.max(startMin, b.start + 1440);
+                    const overlapEndNext = Math.min(endMin, b.end + 1440);
+                    if (overlapEndNext > overlapStartNext) deductionMin += (overlapEndNext - overlapStartNext);
+                });
+                totalInput.value = ((totalMin - deductionMin) / 60).toFixed(1);
+            }
+            autoSyncRecords();
+        }
+
+        async function exportToImage() {
+            const element = document.getElementById('ot-form');
+            const rows = document.querySelectorAll('#ot-tbody tr');
+            rows.forEach(row => {
+                const dayInput = row.querySelector('.ot-day');
+                const select = row.querySelector('.day-type-select');
+                const overlay = row.querySelector('.export-text-overlay');
+                if (!select.classList.contains('hidden')) {
+                    overlay.innerText = select.options[select.selectedIndex].text;
+                    overlay.style.display = 'block';
+                    select.style.visibility = 'hidden';
+                }
+                if (dayInput.value) {
+                    const disp = dayInput.getAttribute('data-display');
+                    const textNode = document.createElement('div');
+                    textNode.className = 'temp-date-text';
+                    textNode.innerText = disp;
+                    textNode.style.position = 'absolute';
+                    textNode.style.top = '10px'; textNode.style.width = '100%';
+                    textNode.style.fontSize = '13px'; textNode.style.zIndex = '10';
+                    dayInput.parentNode.appendChild(textNode);
+                    dayInput.style.visibility = 'hidden';
+                }
+            });
+            const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+            rows.forEach(row => {
+                const dayInput = row.querySelector('.ot-day');
+                const select = row.querySelector('.day-type-select');
+                const overlay = row.querySelector('.export-text-overlay');
+                const tempText = row.querySelector('.temp-date-text');
+                overlay.style.display = 'none';
+                select.style.visibility = 'visible';
+                if (tempText) tempText.remove();
+                dayInput.style.visibility = 'visible';
+            });
+            const link = document.createElement('a');
+            link.download = `加班單_${new Date().toLocaleDateString()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('圖片已匯出');
+        }
+
+        function exportToExcel() {
+            const rows = document.querySelectorAll('#ot-tbody tr');
+            const dataRows = [];
+            rows.forEach(row => {
+                const id = row.querySelector('.emp-id').value;
+                if (id) {
+                    const dayInput = row.querySelector('.ot-day');
+                    const dayVal = dayInput.getAttribute('data-display') || dayInput.value;
+                    const dayType = row.querySelector('.day-type-select').value;
+                    dataRows.push([
+                        id, row.querySelector('.emp-name').value, id === "13056" ? `${dayVal} (${dayType})` : dayVal,
+                        row.querySelector('.start-time').value, row.querySelector('.end-time').value,
+                        parseFloat(row.querySelector('.total-hours').value || 0), 
+                        row.querySelector('.job-desc').value,
+                        row.querySelector('.remarks').value
+                    ]);
+                }
+            });
+            const tableData = [["大量科技股份有限公司"], ["加班申請單"], ["", "", "", "", "", "", "單位：管理部"], ["工號", "姓名", "月/日", "開始", "結束", "時數", "內容", "備註"], ...dataRows];
+            const worksheet = XLSX.utils.aoa_to_sheet(tableData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Overtime");
+            XLSX.writeFile(workbook, `加班單_${new Date().toLocaleDateString()}.xlsx`);
+            showToast('Excel 已匯出');
+        }
+
+        function exportHistoryToExcel(empId) {
+            const storageKey = 'ot_permanent_database';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const kStart = document.getElementById('krai-filter-start').value;
+            const kEnd = document.getElementById('krai-filter-end').value;
+            const mStart = document.getElementById('mon-filter-start').value;
+            const mEnd = document.getElementById('mon-filter-end').value;
+
+            const records = history.filter(rec => {
+                if (rec.empId !== empId) return false;
+                const recDate = rec.dayVal.replace(/\//g, '-');
+                if (empId === "13031") {
+                    if (kStart && recDate < kStart) return false;
+                    if (kEnd && recDate > kEnd) return false;
+                } else {
+                    if (mStart && recDate < mStart) return false;
+                    if (mEnd && recDate > mEnd) return false;
+                }
+                return true;
+            });
+            const name = empMap[empId] || empId;
+            if (records.length === 0) { showToast('目前無紀錄可匯出'); return; }
+
+            let totalSum = 0;
+            let tableData = [];
+            if (empId === "13056") {
+                tableData = [["月/日", "類型", "時間範圍", "時數", "工作內容", "備註"]];
+                records.forEach(r => {
+                    const h = parseFloat(r.hours || 0);
+                    totalSum += h;
+                    tableData.push([r.dayVal, r.dayType, r.timeRange, h, r.job, r.remarks]);
+                });
+                tableData.push(["", "總計 (Total)", "", totalSum, "", ""]);
+            } else {
+                tableData = [["月/日", "時間範圍", "時數", "工作內容", "備註"]];
+                records.forEach(r => {
+                    const h = parseFloat(r.hours || 0);
+                    totalSum += h;
+                    tableData.push([r.dayVal, r.timeRange, h, r.job, r.remarks]);
+                });
+                tableData.push(["總計 (Total)", "", totalSum, "", ""]);
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(tableData);
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = {c: C, r: R};
+                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                    const cell = ws[cell_ref];
+                    
+                    if (cell && cell.v !== undefined) {
+                        const targetCol = (empId === "13056") ? 3 : 2;
+                        if (C === targetCol && R > 0 && !isNaN(parseFloat(cell.v))) {
+                            cell.t = 'n';
+                            cell.v = parseFloat(cell.v);
+                        }
+                    }
+                }
+            }
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, ws, "加班歷史紀錄");
+            XLSX.writeFile(workbook, `${name}_加班紀錄_${new Date().toLocaleDateString()}.xlsx`);
+            showToast(`${name} 的歷史紀錄已匯出 (數值格式已修正)`);
+        }
+
+        function initTable() {
             const tbody = document.getElementById('ot-tbody');
-            tbody.innerHTML = '';
+            tbody.innerHTML = ""; 
+            const timeOps = generateTimeOptions();
             for (let i = 0; i < 10; i++) {
-                const d = data[i] || {};
                 const tr = document.createElement('tr');
-                const isMon = d.id === "13056";
                 tr.innerHTML = `
-                    <td><input type="text" class="emp-id" value="${d.id || ''}" onchange="handleIdChange(this)"></td>
-                    <td><input type="text" class="emp-name" value="${d.name || ''}" readonly></td>
-                    <td>
-                        <div class="relative flex flex-col items-center justify-center h-full">
-                            <input type="date" class="ot-day" value="${d.dateVal || ''}" onchange="handleDateChange(this)" style="color: ${d.dateVal ? 'black' : 'transparent'}">
-                            <select class="day-type-select type-select ${isMon ? '' : 'hidden'}" onchange="calculateHours(this.closest('tr'))">
-                                <option value="平日วันธรรมดา" ${d.type === '平日วันธรรมดา' ? 'selected' : ''}>平日</option>
-                                <option value="假日วันหยุด" ${d.type === '假日วันหยุด' ? 'selected' : ''}>假日</option>
-                            </select>
-                            <div class="export-text-overlay"></div>
-                        </div>
-                    </td>
-                    <td><input type="time" class="start-time" value="${d.start || ''}" onchange="calculateHours(this.closest('tr'))"></td>
-                    <td><input type="time" class="end-time" value="${d.end || ''}" onchange="calculateHours(this.closest('tr'))"></td>
-                    <td><input type="text" class="total-hours font-bold text-blue-600" value="${d.hours || ''}" readonly></td>
-                    <td><input type="text" class="job-desc" value="${d.job || ''}" list="job-list"></td>
-                    <td><input type="text" class="remarks" value="${d.rem || ''}" onblur="handleTranslation(this)"></td>
+                    <td><select class="emp-id" onchange="handleRowEmpChange(this)"><option value="">選擇</option>${Object.keys(empMap).map(id => `<option value="${id}">${id}</option>`).join('')}</select></td>
+                    <td class="bg-gray-50"><input type="text" class="emp-name" readonly placeholder="-"></td>
+                    <td class="px-1 relative"><div class="day-container flex flex-col items-center justify-center h-full gap-0"><input type="date" class="ot-day h-7" onchange="handleDateChange(this)"><div class="w-full day-type-wrapper"><select class="day-type-select type-select hidden" onchange="calculateRowHours(this)"><option value="平日">平日วันธรรมดา</option><option value="假日">假日วันหยุด</option></select><div class="export-text-overlay"></div></div></div></td>
+                    <td class="w-24"><select class="start-time font-mono" onchange="calculateRowHours(this)"><option value="">開始</option>${timeOps}</select></td>
+                    <td class="w-24"><select class="end-time font-mono" onchange="calculateRowHours(this)"><option value="">結束</option>${timeOps}</select></td>
+                    <td class="bg-blue-50"><input type="number" class="total-hours font-bold text-blue-700" readonly></td>
+                    <td><select class="job-desc" onchange="autoSyncRecords()"><option value="">選擇</option>${jobOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}</select></td>
+                    <td><input type="text" class="remarks" onblur="handleTranslation(this)" placeholder="泰文自動翻譯"></td>
                 `;
                 tbody.appendChild(tr);
             }
-        };
+        }
 
-        // 攔截 localStorage 儲存行為以達成自動雲端同步 (來自第二版優化版)
-        const originalSetItem = localStorage.setItem;
-        localStorage.setItem = function(key, value) {
-            originalSetItem.apply(this, arguments);
-            if (key === 'ot_permanent_database') {
-                window.syncHistoryToFirebase(JSON.parse(value));
-            }
-        };
-
-        // 修正後的 triggerAutoSave (結合 V1 的防抖動上傳)
-        let saveTimeout;
-        window.triggerAutoSave = function() {
-            document.getElementById('sync-status').innerText = "○ 偵測變更中...";
-            document.getElementById('sync-status').className = "sync-indicator text-amber-500";
-            document.getElementById('save-loader').style.opacity = "1";
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                await window.performFormSave();
-            }, 1000);
-        };
+        window.onload = initTable;
     </script>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 第一版成功連線的 Config
         const firebaseConfig = {
             apiKey: "AIzaSyB-PCNtremx3bmUZk-tk7LLo-zuIaD4yn8",
             authDomain: "thailand-26530.firebaseapp.com",
@@ -301,88 +868,147 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const docForm = doc(db, "ot_data", "current_sheet");     // 存放目前表單草稿
-        const docHistory = doc(db, "ot_data", "permanent_v2");  // 存放所有歷史紀錄
+        
+        // 歷史紀錄資料庫參照 (第二版)
+        const historyDocRef = doc(db, "overtime_database", "main_records");
+        // 即時表單狀態參照 (第一版合併)
+        const formDocRef = doc(db, "ot_data", "current_sheet"); 
 
-        // 同步目前的表單內容 (第一版核心功能)
-        window.performFormSave = async function() {
+        // ==========================================
+        // 【第一部分】處理歷史紀錄 (保留第二版原封不動邏輯)
+        // ==========================================
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            originalSetItem.apply(this, arguments);
+            if (key === 'ot_permanent_database') {
+                saveHistoryToFirebase(JSON.parse(value));
+            }
+        };
+
+        async function saveHistoryToFirebase(historyArray) {
+            try {
+                await setDoc(historyDocRef, { history: historyArray });
+                console.log("已在背景自動同步歷史紀錄至 Firebase。");
+            } catch (e) {
+                console.error("Firebase 自動同步失敗:", e);
+            }
+        }
+
+        async function loadHistoryFromFirebase() {
+            try {
+                const docSnap = await getDoc(historyDocRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data().history || [];
+                    originalSetItem.call(localStorage, 'ot_permanent_database', JSON.stringify(data));
+                }
+            } catch (e) {
+                console.error("Firebase 歷史紀錄讀取失敗:", e);
+            } finally {
+                if (window.renderSavedRecords) window.renderSavedRecords();
+            }
+        }
+
+        // ==========================================
+        // 【第二部分】處理即時表單狀態同步 (掛載回第一版 UI 及邏輯)
+        // ==========================================
+        let saveTimeout;
+        window.triggerAutoSave = function() {
+            const syncStatus = document.getElementById('sync-status');
+            const saveLoader = document.getElementById('save-loader');
+            
+            if (syncStatus) {
+                syncStatus.innerText = "○ 偵測變更中...";
+                syncStatus.className = "sync-indicator text-amber-500";
+            }
+            if (saveLoader) saveLoader.style.opacity = "1";
+            
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                await window.performSaveForm();
+            }, 1000);
+        };
+
+        window.performSaveForm = async function() {
             const rows = [];
             document.querySelectorAll('#ot-tbody tr').forEach(tr => {
-                const id = tr.querySelector('.emp-id').value;
-                if(id) {
-                    rows.push({
-                        id: id,
-                        name: tr.querySelector('.emp-name').value,
-                        dateVal: tr.querySelector('.ot-day').value,
-                        type: tr.querySelector('.day-type-select').value,
-                        start: tr.querySelector('.start-time').value,
-                        end: tr.querySelector('.end-time').value,
-                        hours: tr.querySelector('.total-hours').value,
-                        job: tr.querySelector('.job-desc').value,
-                        rem: tr.querySelector('.remarks').value
-                    });
-                }
+                rows.push({
+                    id: tr.querySelector('.emp-id').value,
+                    dateVal: tr.querySelector('.ot-day').value,
+                    type: tr.querySelector('.day-type-select').value,
+                    start: tr.querySelector('.start-time').value,
+                    end: tr.querySelector('.end-time').value,
+                    hours: tr.querySelector('.total-hours').value,
+                    job: tr.querySelector('.job-desc').value,
+                    rem: tr.querySelector('.remarks').value,
+                    dataDisplay: tr.querySelector('.ot-day').getAttribute('data-display') || ""
+                });
             });
-
             try {
                 const now = new Date().toLocaleString();
-                await setDoc(docForm, { 
-                    date: document.getElementById('doc_date').value, 
-                    rows: rows, 
-                    lastUpdated: now 
-                });
-                document.getElementById('sync-status').innerText = "● 已同步至雲端";
-                document.getElementById('sync-status').className = "sync-indicator text-green-600";
-                document.getElementById('save-loader').style.opacity = "0";
-                document.getElementById('gen-time').innerText = now;
-            } catch (e) {
-                console.error("同步失敗:", e);
-                document.getElementById('sync-status').innerText = "× 同步失敗";
-            }
-        };
-
-        // 同步歷史紀錄資料庫 (第二版雲端功能)
-        window.syncHistoryToFirebase = async function(historyArray) {
-            try {
-                await setDoc(docHistory, { history: historyArray });
-                console.log("歷史資料庫已同步至 Firebase");
-            } catch (e) {
-                console.error("歷史資料庫同步失敗:", e);
-            }
-        };
-
-        // 初始化載入 (結合兩份資料來源)
-        window.initApp = async function() {
-            try {
-                // 1. 載入歷史紀錄
-                const histSnap = await getDoc(docHistory);
-                if (histSnap.exists()) {
-                    localStorage.setItem('ot_permanent_database', JSON.stringify(histSnap.data().history || []));
+                await setDoc(formDocRef, { rows: rows, lastUpdated: now });
+                
+                const syncStatus = document.getElementById('sync-status');
+                const saveLoader = document.getElementById('save-loader');
+                if (syncStatus) {
+                    syncStatus.innerText = "● 已同步至雲端";
+                    syncStatus.className = "sync-indicator text-green-600";
                 }
-
-                // 2. 載入目前的表單草稿
-                const formSnap = await getDoc(docForm);
-                if (formSnap.exists()) {
-                    const d = formSnap.data();
-                    document.getElementById('doc_date').value = d.date || "";
-                    window.renderTable(d.rows || []);
-                    document.getElementById('gen-time').innerText = d.lastUpdated || "-";
-                } else {
-                    window.renderTable([]);
+                if (saveLoader) saveLoader.style.opacity = "0";
+                
+                const genTime = document.getElementById('gen-time');
+                if(genTime) genTime.innerText = now;
+            } catch (e) { 
+                console.error(e); 
+                const syncStatus = document.getElementById('sync-status');
+                if (syncStatus) {
+                    syncStatus.innerText = "× 同步失敗";
+                    syncStatus.className = "sync-indicator text-red-600";
                 }
-            } catch (e) {
-                console.error("初始化載入失敗:", e);
-                window.renderTable([]);
             }
         };
 
-        window.onload = window.initApp;
+        window.loadFormFromFirebase = async function() {
+            try {
+                const snap = await getDoc(formDocRef);
+                if (snap.exists()) {
+                    const d = snap.data();
+                    if (d.rows) {
+                        const trs = document.querySelectorAll('#ot-tbody tr');
+                        d.rows.forEach((rowObj, i) => {
+                            if (i < trs.length) {
+                                const tr = trs[i];
+                                if (rowObj.id) {
+                                    tr.querySelector('.emp-id').value = rowObj.id;
+                                    window.handleRowEmpChange(tr.querySelector('.emp-id'));
+                                }
+                                if (rowObj.dateVal) {
+                                    const otDay = tr.querySelector('.ot-day');
+                                    otDay.value = rowObj.dateVal;
+                                    if (rowObj.dataDisplay) {
+                                        otDay.setAttribute('data-display', rowObj.dataDisplay);
+                                        otDay.style.color = "black";
+                                    }
+                                }
+                                if (rowObj.type) tr.querySelector('.day-type-select').value = rowObj.type;
+                                if (rowObj.start) tr.querySelector('.start-time').value = rowObj.start;
+                                if (rowObj.end) tr.querySelector('.end-time').value = rowObj.end;
+                                if (rowObj.hours) tr.querySelector('.total-hours').value = rowObj.hours;
+                                if (rowObj.job) tr.querySelector('.job-desc').value = rowObj.job;
+                                if (rowObj.rem) tr.querySelector('.remarks').value = rowObj.rem;
+                            }
+                        });
+                    }
+                    const genTime = document.getElementById('gen-time');
+                    if(genTime) genTime.innerText = d.lastUpdated || "-";
+                }
+            } catch (e) {
+                console.error("Firebase 即時表單狀態讀取失敗:", e);
+            }
+        };
+
+        // 腳本載入完成後，循序執行：先抓歷史數據，再還原目前表單狀態
+        await loadHistoryFromFirebase();
+        await window.loadFormFromFirebase();
     </script>
-
-    <datalist id="job-list">
-        <option value="管理部/แผนกบริหาร">
-        <option value="支援資材部/แผนกวัสดุ">
-        <option value="支援生產部/แผนกผลิต">
-    </datalist>
 </body>
 </html>
