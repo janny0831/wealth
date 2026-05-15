@@ -3,153 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加班申請單 - Overtime Request Form</title>
+    <title>加班申請單 - Firebase Cloud Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap');
-        
-        body {
-            font-family: 'Noto Sans TC', 'Noto Sans Thai', sans-serif;
-            background-color: #f3f4f6;
-        }
-
-        .form-container {
-            background-color: white;
-            padding: 30px;
-            width: 1100px; 
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        th, td {
-            border: 1px solid #000;
-            padding: 4px;
-            text-align: center;
-            vertical-align: middle;
-            height: 60px;
-            overflow: visible; 
-        }
-
-        select, input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            text-align: center;
-            text-align-last: center;
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-            padding: 0;
-            margin: 0;
-            display: block;
-            line-height: 1.2;
-            font-size: 13px;
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            cursor: pointer;
-            opacity: 0;
-        }
-
-        .filter-input {
-            border: 1px solid #e2e8f0 !important;
-            background-color: white !important;
-            border-radius: 6px;
-            height: 32px !important;
-            width: 150px !important;
-            padding: 0 8px !important;
-            font-size: 12px;
-            position: relative;
-        }
-
-        .type-select {
-            font-size: 10px;
-            background-color: #fffbeb;
-            border: 1px solid #fcd34d !important;
-            border-radius: 4px;
-            height: 20px !important;
-            margin-top: -4px; 
-            padding: 0 1px;
-            font-weight: bold;
-            color: #92400e;
-        }
-
-        .tab-btn {
-            padding: 12px 24px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-            font-weight: bold;
-            color: #6b7280;
-            background-color: #f9fafb;
-        }
-        .tab-btn.active {
-            border-bottom: 3px solid #2563eb;
-            color: #2563eb;
-            background-color: white;
-        }
+        body { font-family: 'Noto Sans TC', 'Noto Sans Thai', sans-serif; background-color: #f3f4f6; }
+        .form-container { background-color: white; padding: 30px; width: 1100px; margin-left: auto; margin-right: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: 1px solid #000; padding: 4px; text-align: center; vertical-align: middle; height: 60px; overflow: visible; }
+        select, input { width: 100%; height: 100%; border: none; outline: none; background: transparent; text-align: center; text-align-last: center; appearance: none; -webkit-appearance: none; cursor: pointer; padding: 0; margin: 0; display: block; line-height: 1.2; font-size: 13px; }
+        input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; left: 0; top: 0; width: 100%; height: 100%; margin: 0; padding: 0; cursor: pointer; opacity: 0; }
+        .filter-input { border: 1px solid #e2e8f0 !important; background-color: white !important; border-radius: 6px; height: 32px !important; width: 150px !important; padding: 0 8px !important; font-size: 12px; position: relative; }
+        .type-select { font-size: 10px; background-color: #fffbeb; border: 1px solid #fcd34d !important; border-radius: 4px; height: 20px !important; margin-top: -4px; padding: 0 1px; font-weight: bold; color: #92400e; }
+        .tab-btn { padding: 12px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: bold; color: #6b7280; background-color: #f9fafb; }
+        .tab-btn.active { border-bottom: 3px solid #2563eb; color: #2563eb; background-color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
         .record-table th { background-color: #f8fafc; font-size: 11px; height: 40px; }
         .record-table td { font-size: 12px; height: 45px; border: 1px solid #e2e8f0; }
-
         .translating { background-color: #f0f9ff !important; color: #0369a1; font-style: italic; }
-
-        #confirm-modal, #edit-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(2px);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f2937;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            display: none;
-            z-index: 3000;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-        }
-
-        .export-text-overlay {
-            display: none;
-            font-size: 10px; font-weight: bold; color: #b45309; background-color: #fffbeb;
-            border: 1px solid #fcd34d; border-radius: 4px; width: 100%; padding: 1px 0; margin-top: -4px;
-        }
-
-        @media print {
-            .no-print-area { display: none; }
-            body { background-color: white; padding: 0; }
-            .form-container { box-shadow: none; margin: 0; width: 100%; }
-        }
+        #confirm-modal, #edit-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 12px 24px; border-radius: 9999px; display: none; z-index: 3000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-weight: bold; }
+        .export-text-overlay { display: none; font-size: 10px; font-weight: bold; color: #b45309; background-color: #fffbeb; border: 1px solid #fcd34d; border-radius: 4px; width: 100%; padding: 1px 0; margin-top: -4px; }
+        @media print { .no-print-area { display: none; } body { background-color: white; padding: 0; } .form-container { box-shadow: none; margin: 0; width: 100%; } }
     </style>
 </head>
 <body class="p-4">
@@ -217,27 +95,21 @@
             <div onclick="switchTab('mon-page', this)" class="tab-btn">娜萌 Mon 記錄</div>
         </div>
 
-        <!-- 主表單分頁 -->
         <div id="form-page" class="tab-content active">
             <div class="mb-6 flex flex-wrap gap-4 no-print-area bg-white p-4 rounded-b-lg shadow-md border-t border-gray-100">
-                <button onclick="exportToImage()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
-                    匯出圖片 (Export Image)
-                </button>
-                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
-                    匯出主表 Excel (Export XLSX)
-                </button>
-                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
-                    列印 (Print)
-                </button>
-                <button onclick="confirmClearForm()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 ml-auto text-sm font-bold active:scale-95">
-                    一鍵清空目前表單 (ล้างข้อมูลหน้าหลัก)
-                </button>
+                <button onclick="exportToImage()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">匯出圖片 (Export Image)</button>
+                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">匯出主表 Excel (Export XLSX)</button>
+                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">列印 (Print)</button>
+                <div id="sync-status" class="ml-4 flex items-center text-xs font-bold text-green-600">
+                    <span class="mr-1">●</span> 雲端已連線
+                </div>
+                <button onclick="confirmClearForm()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 ml-auto text-sm font-bold active:scale-95">一鍵清空目前表單 (ล้างข้อมูลหน้าหลัก)</button>
             </div>
 
             <div id="ot-form" class="form-container shadow-xl">
                 <div class="text-center mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">大量科技股份有限公司</h2>
-                    <h1 class="text-xl font-bold text-gray-700">加班申請單 (แบบ傳專ฟอร์มขอทำงานล่วงเวลา)</h1>
+                    <h1 class="text-xl font-bold text-gray-700">加班申請單 (แบบฟอร์มขอทำงานล่วงเวลา)</h1>
                 </div>
                 <div class="flex justify-end mb-4 px-2">
                     <span class="font-bold text-gray-800 underline text-sm">單位：管理部 (Unit: HR Department)</span>
@@ -248,7 +120,7 @@
                             <th class="w-20 font-bold">工號<br><span class="text-[9px] text-gray-500 font-normal">รหัสพนักงาน</span></th>
                             <th class="w-24 font-bold">姓名<br><span class="text-[9px] text-gray-500 font-normal">ชื่อ</span></th>
                             <th class="w-28 font-bold">月/日<br><span class="text-[9px] text-gray-500 font-normal">เดือน/วัน</span></th>
-                            <th class="w-48 font-bold" colspan="2">開始/結束時間 (24H)<br><span class="text-[9px] text-gray-500 font-normal">เวลาเริ่มต้น - สิ้นสุด</span></th>
+                            <th class="w-48 font-bold" colspan="2">開始/結束時間 (24H)<br><span class="text-[9px] text-gray-500 font-normal">เวลาเริ่มต้น - スิ้นสุด</span></th>
                             <th class="w-16 font-bold">時數<br><span class="text-[9px] text-gray-500 font-normal">ชม.</span></th>
                             <th class="w-40 font-bold">工作內容<br><span class="text-[9px] text-gray-500 font-normal">ทำงานอะไร</span></th>
                             <th class="font-bold">備註 (支援泰文自動翻譯)<br><span class="text-[9px] text-gray-500 font-normal">หมายเหตุ (แปลอัตโนมัติ)</span></th>
@@ -268,19 +140,14 @@
             </div>
         </div>
 
-        <!-- 阿凱 Krai 記錄分頁 -->
         <div id="krai-page" class="tab-content bg-white p-8 rounded-b-lg shadow-xl">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-blue-800">阿凱 Krai (13031) 加班記錄頁面</h2>
                 <div class="flex gap-2">
-                    <button onclick="exportHistoryToExcel('13031')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold active:scale-95 transition flex items-center gap-1">
-                        匯出此表 Excel
-                    </button>
+                    <button onclick="exportHistoryToExcel('13031')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold active:scale-95 transition flex items-center gap-1">匯出此表 Excel</button>
                     <button onclick="clearSpecificRecords('13031')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200 hover:bg-red-100 font-bold active:scale-95 transition">清空所有紀錄</button>
                 </div>
             </div>
-
-            <!-- 加班日期區間篩選區塊 (Krai) -->
             <div class="bg-gray-50 p-4 rounded-lg mb-6 flex flex-wrap items-center gap-4 text-sm border border-gray-100">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-gray-600">日期篩選 (Filter Date):</span>
@@ -295,32 +162,22 @@
                     <span class="font-bold text-xs">小時 (Hrs)</span>
                 </div>
             </div>
-
             <div class="overflow-x-auto">
                 <table class="record-table w-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th>年/月/日</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th>
-                        </tr>
-                    </thead>
+                    <thead><tr class="bg-gray-50"><th>年/月/日</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th></tr></thead>
                     <tbody id="krai-records-body"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 娜萌 Mon 記錄分頁 -->
         <div id="mon-page" class="tab-content bg-white p-8 rounded-b-lg shadow-xl">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-amber-700">娜萌 Mon (13056) 加班記錄頁面</h2>
                 <div class="flex gap-2">
-                    <button onclick="exportHistoryToExcel('13056')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold active:scale-95 transition flex items-center gap-1">
-                        匯出此表 Excel
-                    </button>
+                    <button onclick="exportHistoryToExcel('13056')" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-200 hover:bg-green-100 font-bold active:scale-95 transition flex items-center gap-1">匯出此表 Excel</button>
                     <button onclick="clearSpecificRecords('13056')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200 hover:bg-red-100 font-bold active:scale-95 transition">清空所有紀錄</button>
                 </div>
             </div>
-
-            <!-- 加班日期區間篩選區塊 (Mon) -->
             <div class="bg-gray-50 p-4 rounded-lg mb-6 flex flex-wrap items-center gap-4 text-sm border border-gray-100">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-gray-600">日期篩選 (Filter Date):</span>
@@ -335,19 +192,65 @@
                     <span class="font-bold text-xs">小時 (Hrs)</span>
                 </div>
             </div>
-
             <div class="overflow-x-auto">
                 <table class="record-table w-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th>年/月/日</th><th>類型</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th>
-                        </tr>
-                    </thead>
+                    <thead><tr class="bg-gray-50"><th>年/月/日</th><th>類型</th><th>時間範圍</th><th>時數</th><th>工作內容</th><th>備註</th><th class="w-32">操作</th></tr></thead>
                     <tbody id="mon-records-body"></tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-PCNtremx3bmUZk-tk7LLo-zuIaD4yn8",
+            authDomain: "thailand-26530.firebaseapp.com",
+            projectId: "thailand-26530",
+            storageBucket: "thailand-26530.firebasestorage.app",
+            messagingSenderId: "383864827104",
+            appId: "1:383864827104:web:3dfcebf1045debf494f485",
+            measurementId: "G-HCRB6KC4CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'overtime_data');
+
+        // 將同步函數暴露給全域以供現有程式碼調用
+        window.saveToFirebase = function(data) {
+            set(dbRef, {
+                history: data,
+                lastUpdated: new Date().toISOString()
+            }).then(() => {
+                console.log("Firebase 同步成功");
+                document.getElementById('sync-status').innerHTML = '<span class="mr-1">●</span> 雲端已同步';
+                document.getElementById('sync-status').className = 'ml-4 flex items-center text-xs font-bold text-blue-600';
+            }).catch((err) => {
+                console.error("Firebase 同步失敗:", err);
+                document.getElementById('sync-status').innerHTML = '<span class="mr-1">●</span> 同步失敗';
+                document.getElementById('sync-status').className = 'ml-4 flex items-center text-xs font-bold text-red-600';
+            });
+        };
+
+        // 初始化時從 Firebase 讀取資料
+        window.addEventListener('load', async () => {
+            try {
+                const snapshot = await get(dbRef);
+                if (snapshot.exists()) {
+                    const cloudData = snapshot.val().history || [];
+                    localStorage.setItem('ot_permanent_database', JSON.stringify(cloudData));
+                    console.log("從 Firebase 載入資料成功");
+                }
+            } catch (err) {
+                console.error("載入 Firebase 失敗:", err);
+            }
+            // 載入完資料後再初始化表格
+            if (window.initTable) window.initTable();
+        });
+    </script>
 
     <script>
         document.getElementById('gen-time').innerText = new Date().toLocaleString();
@@ -356,7 +259,6 @@
         const empMap = { "13031": "阿凱Krai", "13056": "娜萌Mon" };
         const jobOptions = ["管理部/แผนกบริหาร", "支援資材部/แผนกวัสดุ", "支援生產部/แผนกผลิต"];
 
-        // UI Helpers
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.innerText = msg;
@@ -375,12 +277,8 @@
             };
         }
 
-        function closeConfirmModal() {
-            document.getElementById('confirm-modal').style.display = 'none';
-            confirmCallback = null;
-        }
+        function closeConfirmModal() { document.getElementById('confirm-modal').style.display = 'none'; confirmCallback = null; }
 
-        // Translation Logic
         function containsThai(text) { return /[\u0E00-\u0E7F]/.test(text); }
 
         async function translateText(text) {
@@ -414,28 +312,19 @@
             const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
             const kraiBody = document.getElementById('krai-records-body');
             const monBody = document.getElementById('mon-records-body');
-            
-            let kraiTotalHours = 0;
-            let monTotalHours = 0;
-
-            // 獲取篩選值
+            let kraiTotalHours = 0; let monTotalHours = 0;
             const kStart = document.getElementById('krai-filter-start').value;
             const kEnd = document.getElementById('krai-filter-end').value;
             const mStart = document.getElementById('mon-filter-start').value;
             const mEnd = document.getElementById('mon-filter-end').value;
 
-            kraiBody.innerHTML = '';
-            monBody.innerHTML = '';
-
+            kraiBody.innerHTML = ''; monBody.innerHTML = '';
             history.forEach(rec => {
-                // 將 YYYY/MM/DD 轉為可比較的數值或標準日期字串
                 const recDate = rec.dayVal.replace(/\//g, '-'); 
                 let show = true;
-
                 if (rec.empId === "13031") {
                     if (kStart && recDate < kStart) show = false;
                     if (kEnd && recDate > kEnd) show = false;
-                    
                     if (show) {
                         kraiTotalHours += parseFloat(rec.hours || 0);
                         const tr = document.createElement('tr');
@@ -445,7 +334,6 @@
                 } else if (rec.empId === "13056") {
                     if (mStart && recDate < mStart) show = false;
                     if (mEnd && recDate > mEnd) show = false;
-
                     if (show) {
                         monTotalHours += parseFloat(rec.hours || 0);
                         const tr = document.createElement('tr');
@@ -454,27 +342,21 @@
                     }
                 }
             });
-
             document.getElementById('krai-total-display').innerText = kraiTotalHours.toFixed(1);
             document.getElementById('mon-total-display').innerText = monTotalHours.toFixed(1);
         }
 
         function clearFilter(empId) {
-            if (empId === "13031") {
-                document.getElementById('krai-filter-start').value = "";
-                document.getElementById('krai-filter-end').value = "";
-            } else {
-                document.getElementById('mon-filter-start').value = "";
-                document.getElementById('mon-filter-end').value = "";
-            }
+            if (empId === "13031") { document.getElementById('krai-filter-start').value = ""; document.getElementById('krai-filter-end').value = ""; } 
+            else { document.getElementById('mon-filter-start').value = ""; document.getElementById('mon-filter-end').value = ""; }
             renderSavedRecords();
         }
 
+        // 核心同步邏輯：保存到 Local 與 Firebase
         function autoSyncRecords() {
             const rows = document.querySelectorAll('#ot-tbody tr');
             const storageKey = 'ot_permanent_database';
             let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-
             rows.forEach((row, index) => {
                 const id = row.querySelector('.emp-id').value;
                 const dayInput = row.querySelector('.ot-day');
@@ -485,70 +367,48 @@
                 const job = row.querySelector('.job-desc').value;
                 const remarks = row.querySelector('.remarks').value;
                 const dayType = row.querySelector('.day-type-select').value;
-
                 const recordId = `SID-${currentSessionId}-ROW-${index}`;
                 const recordIndex = history.findIndex(rec => rec.recordId === recordId);
-
                 if (id && dayVal && startTime && endTime && parseFloat(hours) > 0) {
-                    const updatedRecord = {
-                        recordId: recordId,
-                        saveDate: new Date().toLocaleDateString(),
-                        empId: id,
-                        dayVal: dayVal,
-                        dayType: dayType,
-                        timeRange: `${startTime} - ${endTime}`,
-                        hours: hours,
-                        job: job,
-                        remarks: remarks
-                    };
-                    if (recordIndex > -1) history[recordIndex] = updatedRecord;
-                    else history.push(updatedRecord);
-                } else if (recordIndex > -1) {
-                    history.splice(recordIndex, 1);
-                }
+                    const updatedRecord = { recordId, saveDate: new Date().toLocaleDateString(), empId: id, dayVal, dayType, timeRange: `${startTime} - ${endTime}`, hours, job, remarks };
+                    if (recordIndex > -1) history[recordIndex] = updatedRecord; else history.push(updatedRecord);
+                } else if (recordIndex > -1) { history.splice(recordIndex, 1); }
             });
-
             localStorage.setItem(storageKey, JSON.stringify(history));
             renderSavedRecords();
+            // 自動同步到 Firebase
+            if (window.saveToFirebase) window.saveToFirebase(history);
         }
 
         function deleteSingleRecord(recordId) {
-            openConfirmModal(
-                '確定刪除紀錄？',
-                '此操作將從歷史資料庫中移除該筆紀錄 (ลบข้อมูลนี้ใช่หรือไม่)',
-                function() {
-                    const storageKey = 'ot_permanent_database';
-                    let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                    history = history.filter(rec => rec.recordId !== recordId);
-                    localStorage.setItem(storageKey, JSON.stringify(history));
-                    renderSavedRecords();
-                    showToast('紀錄已成功刪除');
-                }
-            );
+            openConfirmModal('確定刪除紀錄？', '此操作將從歷史資料庫中移除該筆紀錄', function() {
+                const storageKey = 'ot_permanent_database';
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.filter(rec => rec.recordId !== recordId);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                renderSavedRecords();
+                if (window.saveToFirebase) window.saveToFirebase(history);
+                showToast('紀錄已成功刪除');
+            });
         }
 
         function clearSpecificRecords(empId) {
             const name = empMap[empId] || empId;
-            openConfirmModal(
-                `確定清空 ${name} 的所有紀錄？`,
-                '這將永久移除該名員工所有的歷史紀錄，且無法恢復。',
-                function() {
-                    const storageKey = 'ot_permanent_database';
-                    let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                    history = history.filter(rec => rec.empId !== empId);
-                    localStorage.setItem(storageKey, JSON.stringify(history));
-                    renderSavedRecords();
-                    showToast(`${name} 的紀錄已全部清空`);
-                }
-            );
+            openConfirmModal(`確定清空 ${name} 的所有紀錄？`, '這將永久移除所有歷史紀錄。', function() {
+                const storageKey = 'ot_permanent_database';
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.filter(rec => rec.empId !== empId);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                renderSavedRecords();
+                if (window.saveToFirebase) window.saveToFirebase(history);
+                showToast(`${name} 的紀錄已清空`);
+            });
         }
 
         function openEditModal(recordId) {
-            const storageKey = 'ot_permanent_database';
-            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const history = JSON.parse(localStorage.getItem('ot_permanent_database') || '[]');
             const rec = history.find(r => r.recordId === recordId);
             if (!rec) return;
-
             document.getElementById('edit-record-id').value = recordId;
             document.getElementById('edit-day').value = rec.dayVal;
             document.getElementById('edit-type').value = rec.dayType;
@@ -556,7 +416,6 @@
             document.getElementById('edit-hours').value = rec.hours;
             document.getElementById('edit-job').value = rec.job;
             document.getElementById('edit-remarks').value = rec.remarks;
-
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -564,10 +423,8 @@
 
         function saveEditRecord() {
             const recordId = document.getElementById('edit-record-id').value;
-            const storageKey = 'ot_permanent_database';
-            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            let history = JSON.parse(localStorage.getItem('ot_permanent_database') || '[]');
             const index = history.findIndex(r => r.recordId === recordId);
-
             if (index > -1) {
                 history[index].dayVal = document.getElementById('edit-day').value;
                 history[index].dayType = document.getElementById('edit-type').value;
@@ -575,38 +432,29 @@
                 history[index].hours = document.getElementById('edit-hours').value;
                 history[index].job = document.getElementById('edit-job').value;
                 history[index].remarks = document.getElementById('edit-remarks').value;
-
-                localStorage.setItem(storageKey, JSON.stringify(history));
+                localStorage.setItem('ot_permanent_database', JSON.stringify(history));
                 closeEditModal();
                 renderSavedRecords();
+                if (window.saveToFirebase) window.saveToFirebase(history);
                 showToast('變更已儲存');
             }
         }
 
         function confirmClearForm() {
-            openConfirmModal(
-                '確定要清空表單？',
-                '此操作將清空目前畫面上的所有輸入內容 (ล้างข้อมูลหน้าหลัก)',
-                function() {
-                    currentSessionId = Date.now();
-                    const rows = document.querySelectorAll('#ot-tbody tr');
-                    rows.forEach(row => {
-                        row.querySelector('.emp-id').value = "";
-                        row.querySelector('.emp-name').value = "";
-                        const otDayInput = row.querySelector('.ot-day');
-                        otDayInput.value = "";
-                        otDayInput.removeAttribute('data-display');
-                        otDayInput.style.color = "transparent";
-                        row.querySelector('.start-time').value = "";
-                        row.querySelector('.end-time').value = "";
-                        row.querySelector('.total-hours').value = "";
-                        row.querySelector('.job-desc').value = "";
-                        row.querySelector('.remarks').value = "";
-                    });
-                    showToast('表單已重設');
-                    renderSavedRecords();
-                }
-            );
+            openConfirmModal('確定要清空表單？', '此操作將清空目前畫面上的所有輸入內容', function() {
+                currentSessionId = Date.now();
+                const rows = document.querySelectorAll('#ot-tbody tr');
+                rows.forEach(row => {
+                    row.querySelector('.emp-id').value = ""; row.querySelector('.emp-name').value = "";
+                    const otDayInput = row.querySelector('.ot-day');
+                    otDayInput.value = ""; otDayInput.removeAttribute('data-display'); otDayInput.style.color = "transparent";
+                    row.querySelector('.start-time').value = ""; row.querySelector('.end-time').value = "";
+                    row.querySelector('.total-hours').value = ""; row.querySelector('.job-desc').value = "";
+                    row.querySelector('.remarks').value = "";
+                });
+                showToast('表單已重設');
+                renderSavedRecords();
+            });
         }
 
         function handleDateChange(input) {
@@ -623,8 +471,7 @@
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active'); btn.classList.add('active');
         }
 
         function generateTimeOptions() {
@@ -657,18 +504,13 @@
             const totalInput = row.querySelector('.total-hours');
             const dayType = row.querySelector('.day-type-select').value;
             if (startStr && endStr) {
-                const toMin = (t) => {
-                    const [h, m] = t.split(':').map(Number);
-                    return h * 60 + m;
-                };
-                let startMin = toMin(startStr);
-                let endMin = toMin(endStr);
+                const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+                let startMin = toMin(startStr); let endMin = toMin(endStr);
                 if (endMin <= startMin) endMin += 1440;
                 let totalMin = endMin - startMin;
-                let breaks = (empId === "13056") ? 
+                let breaks = (empId === "13056") ?
                     (dayType === "平日" ? [{start: 720, end: 780}, {start: 900, end: 930}] : [{start: 450, end: 480}, {start: 720, end: 780}, {start: 1020, end: 1050}]) :
                     [{start: 720, end: 780}, {start: 1020, end: 1050}];
-                
                 let deductionMin = 0;
                 breaks.forEach(b => {
                     const overlapStart = Math.max(startMin, b.start);
@@ -690,38 +532,20 @@
                 const dayInput = row.querySelector('.ot-day');
                 const select = row.querySelector('.day-type-select');
                 const overlay = row.querySelector('.export-text-overlay');
-                if (!select.classList.contains('hidden')) {
-                    overlay.innerText = select.options[select.selectedIndex].text;
-                    overlay.style.display = 'block';
-                    select.style.visibility = 'hidden';
-                }
+                if (!select.classList.contains('hidden')) { overlay.innerText = select.options[select.selectedIndex].text; overlay.style.display = 'block'; select.style.visibility = 'hidden'; }
                 if (dayInput.value) {
                     const disp = dayInput.getAttribute('data-display');
-                    const textNode = document.createElement('div');
-                    textNode.className = 'temp-date-text';
-                    textNode.innerText = disp;
-                    textNode.style.position = 'absolute';
-                    textNode.style.top = '10px'; textNode.style.width = '100%';
-                    textNode.style.fontSize = '13px'; textNode.style.zIndex = '10';
-                    dayInput.parentNode.appendChild(textNode);
-                    dayInput.style.visibility = 'hidden';
+                    const textNode = document.createElement('div'); textNode.className = 'temp-date-text'; textNode.innerText = disp; textNode.style.position = 'absolute'; textNode.style.top = '10px'; textNode.style.width = '100%'; textNode.style.fontSize = '13px'; textNode.style.zIndex = '10';
+                    dayInput.parentNode.appendChild(textNode); dayInput.style.visibility = 'hidden';
                 }
             });
             const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
             rows.forEach(row => {
-                const dayInput = row.querySelector('.ot-day');
-                const select = row.querySelector('.day-type-select');
-                const overlay = row.querySelector('.export-text-overlay');
-                const tempText = row.querySelector('.temp-date-text');
-                overlay.style.display = 'none';
-                select.style.visibility = 'visible';
-                if (tempText) tempText.remove();
-                dayInput.style.visibility = 'visible';
+                const dayInput = row.querySelector('.ot-day'); const select = row.querySelector('.day-type-select'); const overlay = row.querySelector('.export-text-overlay'); const tempText = row.querySelector('.temp-date-text');
+                overlay.style.display = 'none'; select.style.visibility = 'visible';
+                if (tempText) tempText.remove(); dayInput.style.visibility = 'visible';
             });
-            const link = document.createElement('a');
-            link.download = `加班單_${new Date().toLocaleDateString()}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            const link = document.createElement('a'); link.download = `加班單_${new Date().toLocaleDateString()}.png`; link.href = canvas.toDataURL('image/png'); link.click();
             showToast('圖片已匯出');
         }
 
@@ -734,13 +558,7 @@
                     const dayInput = row.querySelector('.ot-day');
                     const dayVal = dayInput.getAttribute('data-display') || dayInput.value;
                     const dayType = row.querySelector('.day-type-select').value;
-                    dataRows.push([
-                        id, row.querySelector('.emp-name').value, id === "13056" ? `${dayVal} (${dayType})` : dayVal,
-                        row.querySelector('.start-time').value, row.querySelector('.end-time').value,
-                        parseFloat(row.querySelector('.total-hours').value || 0), // 轉為數字格式
-                        row.querySelector('.job-desc').value,
-                        row.querySelector('.remarks').value
-                    ]);
+                    dataRows.push([id, row.querySelector('.emp-name').value, id === "13056" ? `${dayVal} (${dayType})` : dayVal, row.querySelector('.start-time').value, row.querySelector('.end-time').value, parseFloat(row.querySelector('.total-hours').value || 0), row.querySelector('.job-desc').value, row.querySelector('.remarks').value]);
                 }
             });
             const tableData = [["大量科技股份有限公司"], ["加班申請單"], ["", "", "", "", "", "", "單位：管理部"], ["工號", "姓名", "月/日", "開始", "結束", "時數", "內容", "備註"], ...dataRows];
@@ -752,80 +570,46 @@
         }
 
         function exportHistoryToExcel(empId) {
-            const storageKey = 'ot_permanent_database';
-            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            
+            const history = JSON.parse(localStorage.getItem('ot_permanent_database') || '[]');
             const kStart = document.getElementById('krai-filter-start').value;
             const kEnd = document.getElementById('krai-filter-end').value;
             const mStart = document.getElementById('mon-filter-start').value;
             const mEnd = document.getElementById('mon-filter-end').value;
-
             const records = history.filter(rec => {
                 if (rec.empId !== empId) return false;
                 const recDate = rec.dayVal.replace(/\//g, '-');
-                if (empId === "13031") {
-                    if (kStart && recDate < kStart) return false;
-                    if (kEnd && recDate > kEnd) return false;
-                } else {
-                    if (mStart && recDate < mStart) return false;
-                    if (mEnd && recDate > mEnd) return false;
-                }
+                if (empId === "13031") { if (kStart && recDate < kStart) return false; if (kEnd && recDate > kEnd) return false; } 
+                else { if (mStart && recDate < mStart) return false; if (mEnd && recDate > mEnd) return false; }
                 return true;
             });
-
             const name = empMap[empId] || empId;
             if (records.length === 0) { showToast('目前無紀錄可匯出'); return; }
-
-            let totalSum = 0;
-            let tableData = [];
-
+            let totalSum = 0; let tableData = [];
             if (empId === "13056") {
                 tableData = [["月/日", "類型", "時間範圍", "時數", "工作內容", "備註"]];
-                records.forEach(r => {
-                    const h = parseFloat(r.hours || 0);
-                    totalSum += h;
-                    tableData.push([r.dayVal, r.dayType, r.timeRange, h, r.job, r.remarks]);
-                });
+                records.forEach(r => { const h = parseFloat(r.hours || 0); totalSum += h; tableData.push([r.dayVal, r.dayType, r.timeRange, h, r.job, r.remarks]); });
                 tableData.push(["", "總計 (Total)", "", totalSum, "", ""]);
             } else {
                 tableData = [["月/日", "時間範圍", "時數", "工作內容", "備註"]];
-                records.forEach(r => {
-                    const h = parseFloat(r.hours || 0);
-                    totalSum += h;
-                    tableData.push([r.dayVal, r.timeRange, h, r.job, r.remarks]);
-                });
+                records.forEach(r => { const h = parseFloat(r.hours || 0); totalSum += h; tableData.push([r.dayVal, r.timeRange, h, r.job, r.remarks]); });
                 tableData.push(["總計 (Total)", "", totalSum, "", ""]);
             }
-
-            // 核心修正：手動建立 Worksheet 並指定單元格類型，確保時數為 'n' (Numeric)
             const ws = XLSX.utils.aoa_to_sheet(tableData);
-            
-            // 遍歷所有單元格，如果是時數欄位且內容是數字，設定為數字格式
             const range = XLSX.utils.decode_range(ws['!ref']);
             for (let R = range.s.r; R <= range.e.r; ++R) {
                 for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    const cell = ws[cell_ref];
-                    
-                    if (cell && cell.v !== undefined) {
-                        // 如果是時數列 (阿凱是第 2 列 [index 0,1,2], 娜萌是第 3 列 [index 0,1,2,3])
-                        const targetCol = (empId === "13056") ? 3 : 2;
-                        if (C === targetCol && R > 0 && !isNaN(parseFloat(cell.v))) {
-                            cell.t = 'n'; // 設定為數字類型
-                            cell.v = parseFloat(cell.v);
-                        }
-                    }
+                    const cell = ws[XLSX.utils.encode_cell({c: C, r: R})];
+                    const targetCol = (empId === "13056") ? 3 : 2;
+                    if (cell && C === targetCol && R > 0 && !isNaN(parseFloat(cell.v))) { cell.t = 'n'; cell.v = parseFloat(cell.v); }
                 }
             }
-
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, ws, "加班歷史紀錄");
             XLSX.writeFile(workbook, `${name}_加班紀錄_${new Date().toLocaleDateString()}.xlsx`);
-            showToast(`${name} 的歷史紀錄已匯出 (數值格式已修正)`);
+            showToast(`${name} 的歷史紀錄已匯出`);
         }
 
-        function initTable() {
+        window.initTable = function() {
             const tbody = document.getElementById('ot-tbody');
             tbody.innerHTML = ""; 
             const timeOps = generateTimeOptions();
@@ -845,8 +629,6 @@
             }
             renderSavedRecords();
         }
-
-        window.onload = initTable;
     </script>
 </body>
 </html>
