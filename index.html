@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap');
+        
         body {
             font-family: 'Noto Sans TC', 'Noto Sans Thai', sans-serif;
             background-color: #f3f4f6;
@@ -20,6 +21,7 @@
             width: 1100px; 
             margin-left: auto;
             margin-right: auto;
+            position: relative;
         }
 
         table {
@@ -145,6 +147,14 @@
             margin-top: -4px;
         }
 
+        .sync-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         @media print {
             .no-print-area { display: none; }
             body { background-color: white; padding: 0; }
@@ -180,11 +190,11 @@
                     <input type="text" id="edit-day" class="border rounded p-2 w-full bg-gray-50">
                 </div>
                 <div>
-                 <label class="block text-sm font-bold text-gray-700">類型 (限娜萌)</label>
+                    <label class="block text-sm font-bold text-gray-700">類型 (限娜萌)</label>
                     <select id="edit-type" class="border rounded p-2 w-full bg-gray-50">
                         <option value="平日">平日</option>
                         <option value="假日">假日</option>
-                  </select>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700">時間範圍</label>
@@ -200,7 +210,7 @@
                 <input type="text" id="edit-job" class="border rounded p-2 w-full bg-gray-50">
             </div>
             <div class="mb-6">
-                 <label class="block text-sm font-bold text-gray-700">備註</label>
+                <label class="block text-sm font-bold text-gray-700">備註</label>
                 <textarea id="edit-remarks" class="border rounded p-2 w-full h-24 bg-gray-50"></textarea>
             </div>
             <div class="flex justify-end gap-3">
@@ -218,7 +228,7 @@
         </div>
 
         <div id="form-page" class="tab-content active">
-            <div class="mb-6 flex flex-wrap gap-4 no-print-area bg-white p-4 rounded-b-lg shadow-md border-t border-gray-100">
+            <div class="mb-6 flex flex-wrap gap-4 no-print-area bg-white p-4 rounded-b-lg shadow-md border-t border-gray-100 items-center">
                 <button onclick="exportToImage()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 text-sm font-bold active:scale-95">
                     匯出圖片 (Export Image)
                 </button>
@@ -231,9 +241,16 @@
                 <button onclick="confirmClearForm()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow transition flex items-center gap-2 ml-auto text-sm font-bold active:scale-95">
                     一鍵清空目前表單 (ล้างข้อมูลหน้าหลัก)
                 </button>
+
+                <div id="save-loader" class="flex items-center text-gray-500 text-sm italic ml-4 opacity-0 transition-opacity">
+                    <svg class="animate-spin h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    同步中...
+                </div>
             </div>
 
             <div id="ot-form" class="form-container shadow-xl">
+                <div id="sync-status" class="sync-indicator text-green-600">● 雲端已連線</div>
+                
                 <div class="text-center mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">大量科技股份有限公司</h2>
                     <h1 class="text-xl font-bold text-gray-700">加班申請單 (แบบฟอร์มขอทำงานล่วงเวลา)</h1>
@@ -498,6 +515,8 @@
 
             localStorage.setItem(storageKey, JSON.stringify(history));
             renderSavedRecords();
+
+            if(window.triggerAutoSave) window.triggerAutoSave();
         }
 
         function deleteSingleRecord(recordId) {
@@ -591,6 +610,8 @@
                     });
                     showToast('表單已重設');
                     renderSavedRecords();
+                    
+                    if(window.triggerAutoSave) window.triggerAutoSave();
                 }
             );
         }
@@ -659,6 +680,7 @@
                     const overlapStart = Math.max(startMin, b.start);
                     const overlapEnd = Math.min(endMin, b.end);
                     if (overlapEnd > overlapStart) deductionMin += (overlapEnd - overlapStart);
+                  
                     const overlapStartNext = Math.max(startMin, b.start + 1440);
                     const overlapEndNext = Math.min(endMin, b.end + 1440);
                     if (overlapEndNext > overlapStartNext) deductionMin += (overlapEndNext - overlapStartNext);
@@ -822,18 +844,15 @@
                 `;
                 tbody.appendChild(tr);
             }
-            // 不要在此處呼叫 renderSavedRecords，改由 Firebase 模組載入完畢後觸發
         }
 
         window.onload = initTable;
     </script>
 
     <script type="module">
-        // 為了支援 GitHub Pages 靜態環境，此處自動將原廠 SDK 轉為 CDN 載入方式
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 你的 Firebase 設定檔
         const firebaseConfig = {
             apiKey: "AIzaSyB-PCNtremx3bmUZk-tk7LLo-zuIaD4yn8",
             authDomain: "thailand-26530.firebaseapp.com",
@@ -844,55 +863,145 @@
             measurementId: "G-HCRB6KC4CN"
         };
 
-        // 初始化 Firebase 與 Firestore (建議用 Firestore 儲存文件型資料較為穩定)
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const docRef = doc(db, "overtime_database", "main_records");
+        
+        const historyDocRef = doc(db, "overtime_database", "main_records");
+        const formDocRef = doc(db, "ot_data", "current_sheet"); 
 
-        // 核心邏輯：攔截器 (Interceptor) 
-        // 我們把原先瀏覽器的 localStorage.setItem 偷偷包裝起來
         const originalSetItem = localStorage.setItem;
         localStorage.setItem = function(key, value) {
-            // 讓原系統繼續做它原本儲存到電腦本地的事
             originalSetItem.apply(this, arguments);
-            
-            // 當發現原系統儲存的是「加班資料庫 (ot_permanent_database)」時，無感同步丟上雲端
             if (key === 'ot_permanent_database') {
-                saveToFirebase(JSON.parse(value));
+                saveHistoryToFirebase(JSON.parse(value));
             }
         };
 
-        // 背景自動上傳到雲端
-        async function saveToFirebase(historyArray) {
+        async function saveHistoryToFirebase(historyArray) {
             try {
-                await setDoc(docRef, { history: historyArray });
-                console.log("已在背景自動同步至 Firebase。");
+                await setDoc(historyDocRef, { history: historyArray });
+                console.log("已在背景自動同步歷史紀錄至 Firebase。");
             } catch (e) {
                 console.error("Firebase 自動同步失敗:", e);
             }
         }
 
-        // 開啟網頁時，自動從雲端抓取最新的資料並覆蓋到網頁上
-        async function loadFromFirebase() {
+        async function loadHistoryFromFirebase() {
             try {
-                const docSnap = await getDoc(docRef);
+                const docSnap = await getDoc(historyDocRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data().history || [];
-                    // 使用「未被攔截」的原始儲存函式，避免觸發無限迴圈上傳
                     originalSetItem.call(localStorage, 'ot_permanent_database', JSON.stringify(data));
                 }
             } catch (e) {
-                console.error("Firebase 讀取失敗:", e);
+                console.error("Firebase 歷史紀錄讀取失敗:", e);
             } finally {
-                // 確保無論從雲端抓不抓得到資料，最後都把畫面渲染出來
-                if (window.renderSavedRecords) {
-                    window.renderSavedRecords();
-                }
+                if (window.renderSavedRecords) window.renderSavedRecords();
             }
         }
 
-        // 腳本載入完成後，執行抓取流程
-        loadFromFirebase();
+        let saveTimeout;
+        window.triggerAutoSave = function() {
+            const syncStatus = document.getElementById('sync-status');
+            const saveLoader = document.getElementById('save-loader');
+            
+            if (syncStatus) {
+                syncStatus.innerText = "○ 偵測變更中...";
+                syncStatus.className = "sync-indicator text-amber-500";
+            }
+            if (saveLoader) saveLoader.style.opacity = "1";
+            
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                await window.performSaveForm();
+            }, 1000);
+        };
+
+        window.performSaveForm = async function() {
+            const rows = [];
+            document.querySelectorAll('#ot-tbody tr').forEach(tr => {
+                rows.push({
+                    id: tr.querySelector('.emp-id').value,
+                    dateVal: tr.querySelector('.ot-day').value,
+                    type: tr.querySelector('.day-type-select').value,
+                    start: tr.querySelector('.start-time').value,
+                    end: tr.querySelector('.end-time').value,
+                    hours: tr.querySelector('.total-hours').value,
+                    job: tr.querySelector('.job-desc').value,
+                    rem: tr.querySelector('.remarks').value,
+                    dataDisplay: tr.querySelector('.ot-day').getAttribute('data-display') || ""
+                });
+            });
+            try {
+                const now = new Date().toLocaleString();
+                // ✅ 修正重點：把當下的 Session ID 也存進雲端表單狀態中
+                await setDoc(formDocRef, { rows: rows, lastUpdated: now, sessionId: currentSessionId });
+                
+                const syncStatus = document.getElementById('sync-status');
+                const saveLoader = document.getElementById('save-loader');
+                if (syncStatus) {
+                    syncStatus.innerText = "● 已同步至雲端";
+                    syncStatus.className = "sync-indicator text-green-600";
+                }
+                if (saveLoader) saveLoader.style.opacity = "0";
+                
+                const genTime = document.getElementById('gen-time');
+                if(genTime) genTime.innerText = now;
+            } catch (e) { 
+                console.error(e); 
+                const syncStatus = document.getElementById('sync-status');
+                if (syncStatus) {
+                    syncStatus.innerText = "× 同步失敗";
+                    syncStatus.className = "sync-indicator text-red-600";
+                }
+            }
+        };
+
+        window.loadFormFromFirebase = async function() {
+            try {
+                const snap = await getDoc(formDocRef);
+                if (snap.exists()) {
+                    const d = snap.data();
+                    
+                    // ✅ 修正重點：若雲端有存之前的 Session ID，則將目前的 ID 替換回之前的 ID，防止歷史紀錄視為新紀錄而重複
+                    if (d.sessionId) currentSessionId = d.sessionId; 
+                    
+                    if (d.rows) {
+                        const trs = document.querySelectorAll('#ot-tbody tr');
+                        d.rows.forEach((rowObj, i) => {
+                            if (i < trs.length) {
+                                const tr = trs[i];
+                                if (rowObj.id) {
+                                    tr.querySelector('.emp-id').value = rowObj.id;
+                                    window.handleRowEmpChange(tr.querySelector('.emp-id'));
+                                }
+                                if (rowObj.dateVal) {
+                                    const otDay = tr.querySelector('.ot-day');
+                                    otDay.value = rowObj.dateVal;
+                                    if (rowObj.dataDisplay) {
+                                        otDay.setAttribute('data-display', rowObj.dataDisplay);
+                                        otDay.style.color = "black";
+                                    }
+                                }
+                                if (rowObj.type) tr.querySelector('.day-type-select').value = rowObj.type;
+                                if (rowObj.start) tr.querySelector('.start-time').value = rowObj.start;
+                                if (rowObj.end) tr.querySelector('.end-time').value = rowObj.end;
+                                if (rowObj.hours) tr.querySelector('.total-hours').value = rowObj.hours;
+                                if (rowObj.job) tr.querySelector('.job-desc').value = rowObj.job;
+                                if (rowObj.rem) tr.querySelector('.remarks').value = rowObj.rem;
+                            }
+                        });
+                    }
+                    const genTime = document.getElementById('gen-time');
+                    if(genTime) genTime.innerText = d.lastUpdated || "-";
+                }
+            } catch (e) {
+                console.error("Firebase 即時表單狀態讀取失敗:", e);
+            }
+        };
+
+        await loadHistoryFromFirebase();
+        await window.loadFormFromFirebase();
     </script>
 </body>
 </html>
